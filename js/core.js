@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================================
-  // 🚪 时空大门验证引擎 (Gatekeeper)
+  // 🚪 时空大门验证引擎 (Gatekeeper) - 物理级防击穿与统一密码体系
   // ============================================================================
   function initGatekeeperUI() {
     const gateCfg = config.gatekeeper || {};
@@ -305,32 +305,43 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // 🌟 明确提示默认口令，方便用户使用统一密码 521
     if (dom.gatekeeperHint) {
-      dom.gatekeeperHint.textContent = gateCfg.hint || "提示：默认口令为 521 (支持在后台统一修改)";
+      dom.gatekeeperHint.textContent = gateCfg.hint || "提示：初始默认口令为 521 (支持在后台统一修改)";
     }
     
-    // 🌟 拦截幽灵点击事件，彻底解决由于事件穿透引发的乱跳转Bug
+    // 🌟 拦截幽灵点击事件，彻底解决由于事件冒泡穿透引发的日记乱跳转Bug
     if (dom.gatekeeperBtn) {
-      dom.gatekeeperBtn.onclick = (e) => { 
-        e.preventDefault(); 
-        e.stopPropagation();
-        verifyPassword(dom.gatekeeperInput ? dom.gatekeeperInput.value.trim() : ""); 
-      };
-    }
-    if (dom.gatekeeperInput) {
-      dom.gatekeeperInput.onkeydown = (e) => { 
-        if (e.key === "Enter") { 
+      ['click', 'touchstart'].forEach(evt => {
+        dom.gatekeeperBtn.addEventListener(evt, (e) => {
           e.preventDefault(); 
           e.stopPropagation();
+          verifyPassword(dom.gatekeeperInput ? dom.gatekeeperInput.value.trim() : ""); 
+        }, { passive: false });
+      });
+    }
+
+    if (dom.gatekeeperInput) {
+      // 严密死锁：杜绝输入框本身的任何点击冒泡出去触发隐形功能卡片
+      ['click', 'mousedown', 'touchstart', 'touchend'].forEach(evt => {
+        dom.gatekeeperInput.addEventListener(evt, e => e.stopPropagation(), { passive: false });
+      });
+
+      dom.gatekeeperInput.onkeydown = (e) => { 
+        e.stopPropagation();
+        if (e.key === "Enter") { 
+          e.preventDefault(); 
           verifyPassword(dom.gatekeeperInput.value.trim()); 
         } 
       };
     }
+
     if (dom.voiceUnlockBtn) {
-      dom.voiceUnlockBtn.onclick = (e) => { 
-        e.preventDefault(); 
-        e.stopPropagation();
-        startVoiceRecognition(); 
-      };
+      ['click', 'touchstart'].forEach(evt => {
+        dom.voiceUnlockBtn.addEventListener(evt, (e) => {
+          e.preventDefault(); 
+          e.stopPropagation();
+          startVoiceRecognition(); 
+        }, { passive: false });
+      });
     }
   }
 
@@ -343,6 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      // 通过 /api/login 或 verify-gatekeeper，底层 Worker 已经将两者密码打通
       const res = await fetch("/api/love/verify-gatekeeper", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -358,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (result.memberToken) {
           try { sessionStorage.setItem("member_token", result.memberToken); } catch (_) {}
         }
-        // 如果输入的是后台管理密码，直接同步提权
+        // 🌟 核心：如果验证发现匹配了后台管理员密码，直接前端同步提权
         if (result.isAdmin) {
           localStorage.setItem("love_owner_token", inputVal);
           localStorage.setItem("love_admin_token", inputVal);
@@ -369,13 +381,15 @@ document.addEventListener("DOMContentLoaded", () => {
         triggerPasswordError();
       }
     } catch (_) {
-      // 🛡️ 离线沙盒降级兜底：支持 521 与经典密码
-      if (inputVal === "521" || inputVal === "240520" || (config.adminSecurity && inputVal === config.adminSecurity.password)) {
-        if (inputVal === "521" || (config.adminSecurity && inputVal === config.adminSecurity.password)) {
+      // 🛡️ 离线沙盒降级兜底：完全支持 521 与动态后台密码
+      const adminPwd = config.adminSecurity?.password ? String(config.adminSecurity.password).trim() : "";
+      if (inputVal === "521" || inputVal === "240520" || (adminPwd && inputVal === adminPwd)) {
+        if (inputVal === "521" || (adminPwd && inputVal === adminPwd)) {
           localStorage.setItem("love_owner_token", inputVal);
           localStorage.setItem("love_admin_token", inputVal);
           updateFrontendRBAC(true);
         }
+        if (window.Effects) window.Effects.playAudio("gatekeeperPass");
         unlockMainUniverse(true);
       } else {
         triggerPasswordError();
@@ -482,7 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
     vowList.push("包容");
     vowList.push("接纳");
     vowList.push("一生一世");
-    // 🌟 语音引擎兼容统一密码 521
+    // 🌟 语音引擎全面兼容 521 与动态后台密码
     vowList.push("521");
     if (config.adminSecurity && config.adminSecurity.password) {
       vowList.push(String(config.adminSecurity.password).trim().toLowerCase());
