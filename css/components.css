@@ -1,7 +1,7 @@
 /**
  * 恋爱时光轴 & 漫游宇宙 (Love Universe)
  * 文件名: css/components.css
- * 核心升级：顶部悬浮音乐胶囊 + 全局星轨中枢无限弹窗 + 彻底消灭幽灵点击穿透
+ * 核心升级：顶部悬浮音乐胶囊 + 全局星轨中枢无限弹窗 + 彻底消灭幽灵点击穿透 + 完美兼容浅色主题(Light Mode)
  */
 
 /* ================= 基础背景层 ================= */
@@ -519,7 +519,7 @@
 .hub-modal-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 20px; padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid var(--border-card, rgba(255, 255, 255, 0.1));
   flex-shrink: 0;
 }
 .hub-modal-title-box { display: flex; flex-direction: column; gap: 4px; }
@@ -530,14 +530,17 @@
   border-radius: 16px; display: inline-table; width: fit-content;
 }
 .hub-modal-title { font-size: 18px; font-weight: 900; color: var(--text-hero, #fde68a); letter-spacing: 1px; }
+
+/* 修复 Light Mode 下右上角关闭按钮消失的问题 */
 .hub-modal-close {
   width: 32px; height: 32px; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border);
-  color: #fff; font-size: 14px; font-weight: 900; cursor: pointer;
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.1)); 
+  border: 1px solid var(--border-card, var(--glass-border));
+  color: var(--text-main, #ffffff); font-size: 14px; font-weight: 900; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s ease;
 }
-.hub-modal-close:hover { background: var(--primary-pink); border-color: var(--primary-pink); transform: rotate(90deg) scale(1.1); }
+.hub-modal-close:hover { background: var(--primary-pink); border-color: var(--primary-pink); color: #fff; transform: rotate(90deg) scale(1.1); }
 
 .hub-modal-body {
   flex: 1; overflow-y: auto; overflow-x: hidden;
@@ -634,42 +637,45 @@
   line-height: 1.2;
 }
 
-/* 高级权限区专属分隔与操作按钮 */
+/* 🌟 高级权限区专属分隔与操作按钮（已完美适配深浅主题） */
 .hub-modal-divider {
   display: flex; align-items: center; text-align: center;
-  margin: 28px 0 16px; color: var(--text-muted); font-size: 12px; font-weight: 800; letter-spacing: 1px;
+  margin: 28px 0 16px; font-size: 12px; font-weight: 800; letter-spacing: 1px;
 }
 .hub-modal-divider::before, .hub-modal-divider::after {
-  content: ''; flex: 1; border-bottom: 1px dashed rgba(255,255,255,0.15);
+  content: ''; flex: 1; border-bottom: 1px dashed var(--border-card, rgba(255,255,255,0.15));
 }
-.hub-modal-divider span { padding: 0 14px; color: rgba(255,255,255,0.4); }
+.hub-modal-divider span { padding: 0 14px; color: var(--text-muted, rgba(255,255,255,0.5)); }
 
 .hub-management-area {
   display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
   padding-bottom: 10px;
 }
 .hub-mgmt-btn {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-overlay, rgba(127, 127, 127, 0.15));
+  border: 1.5px solid var(--border-card, rgba(255, 255, 255, 0.1));
   border-radius: 18px; padding: 16px 14px;
   display: flex; align-items: center; gap: 12px;
-  cursor: pointer; text-align: left; transition: all 0.25s var(--ease-spring);
+  cursor: pointer; text-align: left; transition: all 0.28s var(--ease-spring);
 }
 .hub-mgmt-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(245, 158, 11, 0.4);
+  background: var(--bg-card-hover, rgba(127, 127, 127, 0.25));
+  border-color: var(--accent-gold, #f59e0b);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+.hub-mgmt-btn:active {
+  transform: translateY(1px);
 }
 .hub-mgmt-icon {
-  font-size: 24px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+  font-size: 24px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
   flex-shrink: 0;
 }
 .hub-mgmt-text { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.hub-mgmt-title { font-size: 13.5px; font-weight: 800; color: #fff; }
-.hub-mgmt-desc { font-size: 10.5px; font-weight: 600; color: #94a3b8; }
-.hub-mgmt-arrow { color: rgba(255,255,255,0.3); font-size: 14px; font-weight: 900; transition: color 0.2s; }
-.hub-mgmt-btn:hover .hub-mgmt-arrow { color: #f59e0b; transform: translateX(2px); }
+.hub-mgmt-title { font-size: 13.5px; font-weight: 900; color: var(--text-main, #ffffff); }
+.hub-mgmt-desc { font-size: 10px; font-weight: 600; color: var(--text-muted, #94a3b8); }
+.hub-mgmt-arrow { color: var(--text-muted, rgba(255,255,255,0.3)); font-size: 14px; font-weight: 900; transition: color 0.28s var(--ease-spring); }
+.hub-mgmt-btn:hover .hub-mgmt-arrow { color: var(--accent-gold, #f59e0b); transform: translateX(3px); }
 
 /* ================= 🎪 全屏沉浸分幕系统 (Stage Modals) ================= */
 .stage-overlay {
@@ -1764,7 +1770,7 @@
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  visibility: hidden; /* 🌟 */
+  visibility: hidden;
   transition: opacity 0.5s, visibility 0.5s;
 }
 
