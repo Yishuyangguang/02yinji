@@ -1,7 +1,7 @@
 /**
  * 恋爱时光轴 & 漫游宇宙 (Love Universe)
  * 文件名: css/components.css
- * 核心升级：顶部悬浮音乐胶囊 + 全局星轨中枢无限弹窗 + 全屏沉浸分幕 + 科幻门禁舱
+ * 核心升级：顶部悬浮音乐胶囊 + 全局星轨中枢无限弹窗 + 全屏沉浸分幕 + 灵宠入口收编
  */
 
 /* ================= 基础背景层 ================= */
@@ -20,6 +20,18 @@
 }
 .fireworks-canvas {
   z-index: 99999;
+}
+
+/* ================= 🕊️ 灵宠入口全局收编 ================= */
+/* 彻底将灵宠入口收编至中枢，隐藏原悬浮挂件以保持主界面极简纯净 */
+.grace-pet-widget,
+#grace-pet-widget,
+[class*="grace-pet-widget"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: scale(0) !important;
+  z-index: -100 !important;
 }
 
 /* ================= 基础按钮库 ================= */
@@ -534,7 +546,7 @@
   overscroll-behavior: contain;
 }
 
-/* 原有 3x3 完美九宫格卡片引擎移植 */
+/* 原有 3x3 完美九宫格卡片引擎移植，随功能扩充至 3xN */
 .hub-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1314,7 +1326,7 @@
   font-family: ui-monospace, monospace;
 }
 
-/* ================= 🌟 极简半透明悬浮爱心音乐晶体 (升级版：顶部音乐胶囊) ================= */
+/* ================= 🌟 极简半透明悬浮爱心音乐晶体 ================= */
 .top-music-capsule {
   position: fixed;
   top: max(18px, env(safe-area-inset-top, 18px));
@@ -1395,8 +1407,9 @@
 /* ================= 🌟 全局星轨中枢触发器 ================= */
 .global-hub-trigger {
   position: fixed;
-  bottom: max(24px, env(safe-area-inset-bottom, 24px));
-  right: max(20px, env(safe-area-inset-right, 20px));
+  /* 🌟 核心：为防止底部拥挤和触控死区，将按钮适度上移 */
+  bottom: max(48px, env(safe-area-inset-bottom, 48px));
+  right: max(24px, env(safe-area-inset-right, 24px));
   z-index: 55000;
   width: 56px; height: 56px;
   border-radius: 50%;
@@ -2045,8 +2058,10 @@
   .top-music-capsule { left: 10px; top: max(10px, env(safe-area-inset-top, 10px)); padding: 3px 4px; }
   .music-info { max-width: 60px; }
   .music-title { font-size: 11px; }
-  .global-hub-trigger { bottom: max(16px, env(safe-area-inset-bottom, 16px)); right: 16px; width: 48px; height: 48px; }
-  .global-hub-icon { font-size: 22px; }
+  
+  /* 🌟 核心：为防止底部拥挤和触控死区，将按钮移动端同样适度上移 */
+  .global-hub-trigger { bottom: max(36px, env(safe-area-inset-bottom, 36px)); right: 20px; width: 50px; height: 50px; }
+  .global-hub-icon { font-size: 24px; }
 
   /* 星轨功能中枢弹窗的移动端设配 */
   .hub-modal-dialog {
