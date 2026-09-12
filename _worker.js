@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe SaaS Engine)
  * 文件名: _worker.js
- * 架构: 异步静默垃圾回收 + 单一高科鉴权中间件 + 严格租户独立鉴权 + 独立日记应用 API + CD-Key短密钥高科授权
+ * 架构: 异步静默垃圾回收 + 单一高科鉴权中间件 + 柔性降级(防500报错) + 独立日记应用 API
  */
 export default {
   async fetch(request, env, ctx) {
@@ -42,7 +42,7 @@ export default {
       flagship: { storageBytes: 520 * 1024 * 1024, maxFileBytes: 20 * 1024 * 1024 }      // PRO 旗舰版: 520MB (单文件20MB)
     };
 
-    // 🌟 [重构] 安全令牌生成引擎：使用 HMAC SHA-256 生成无状态防伪造 Token
+    // 🌟 安全令牌生成引擎：使用 HMAC SHA-256 生成无状态防伪造 Token
     async function buildAdminToken(domain) {
       const enc = new TextEncoder();
       const secret = MASTER_LICENSE_SECRET + (ADMIN_PASSWORD || "521");
@@ -52,7 +52,7 @@ export default {
       return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
     }
 
-    // 🌟 [重构] 统一身份鉴权逻辑：废除双密码，实现单一管理员密码校验
+    // 🌟 统一身份鉴权逻辑：废除双密码，实现单一管理员密码校验
     async function verifyAdminAuth(req) {
       const headerAuth = req.headers.get("x-admin-auth") || req.headers.get("x-member-token") || req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       const queryAuth = url.searchParams.get("token") || url.searchParams.get("auth") || url.searchParams.get("mtoken");
@@ -68,7 +68,7 @@ export default {
       if (ADMIN_PASSWORD && ADMIN_PASSWORD !== "521" && token === ADMIN_PASSWORD) return true;
       if (token === "521") return true;
 
-      // 3. 向下兼容：读取云端旧配置中可能残留的用户自定义密码，防止用户被锁死
+      // 3. 向下兼容：读取云端旧配置中可能残留的用户自定义密码
       if (bucket) {
         try {
           const obj = await bucket.get(CONFIG_KEY);
@@ -127,12 +127,10 @@ export default {
       };
       
       const validStage = ["dating", "engaged", "married"].includes(stage) ? stage : "dating";
-      
       let validAction = actionType;
       if (!standardDict[validStage][validAction]) {
         validAction = Object.keys(standardDict[validStage])[0];
       }
-      
       const fallback = standardDict[validStage][validAction];
       
       if (userCustomText && typeof userCustomText === "string" && userCustomText.trim().length > 0) {
@@ -188,6 +186,7 @@ export default {
     }
 
     async function executeSilentGC(activeConfig) {
+      if (!bucket) return;
       try {
         const activeUrls = new Set();
         function extractUrls(node) {
@@ -236,8 +235,7 @@ export default {
     }
 
     // ============================================================================
-    // 🛡️ [新增] 全局写操作强鉴权拦截中间件 (Global Auth Interceptor)
-    // 拦截所有非 GET 且非白名单的敏感写入/修改请求，确保底层绝对安全
+    // 🛡️ 全局写操作强鉴权拦截中间件 (Global Auth Interceptor)
     // ============================================================================
     if (request.method !== "GET" && request.method !== "OPTIONS") {
       const publicWritePaths = [
@@ -295,7 +293,6 @@ export default {
 
         if (isValid) {
           const token = await buildAdminToken(rawHost);
-          // memberToken 字段保留，为了防止旧版前端断裂，无缝升级
           return jsonResponse({ success: true, token, memberToken: token, isAdmin: true, message: "✨ 身份验证通过，契约秘境与高级权限已解锁" });
         }
         return jsonResponse({ success: false, error: "口令错误，无法解锁印记" }, 401);
@@ -309,14 +306,19 @@ export default {
 
       // 🌟 3. 获取/更新系统配置
       if (url.pathname === "/api/love/config" && request.method === "GET") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         const isAdmin = await verifyAdminAuth(request);
+        const quotaView = await buildQuotaView();
+
+        // 🛡️ 柔性降级：无 R2 绑定时返回默认状态 200，杜绝前端红屏 500 报错
+        if (!bucket) {
+          return jsonResponse({ success: true, custom: false, domain: rawHost, config: null, isAdmin, quota: quotaView, isLocalMode: true });
+        }
+
         let customConfig = null;
         try {
           const obj = await bucket.get(CONFIG_KEY);
           if (obj) customConfig = JSON.parse(await obj.text());
         } catch (_) {}
-        const quotaView = await buildQuotaView();
         
         if (customConfig) {
           if (!isAdmin) {
@@ -330,7 +332,8 @@ export default {
       }
 
       if (url.pathname === "/api/love/config" && request.method === "POST") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        // 🛡️ 柔性降级：拦截无库写入
+        if (!bucket) return jsonResponse({ success: false, error: "系统未绑定 R2 存储空间，当前为本地游览模式，无法保存配置。" }, 200);
         
         let reqData;
         try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false, error: "数据格式错误" }, 400); }
@@ -364,7 +367,9 @@ export default {
 
       // 🌟 4. 契约秘境与情感信号
       if (url.pathname === "/api/love/signal" && request.method === "GET") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        // 🛡️ 柔性降级
+        if (!bucket) return jsonResponse({ success: true, activeSignal: null, recentHistory: [], serverTime: Date.now(), isLocalMode: true });
+
         let signalData = { activeSignal: null, history: [] };
         try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
         const now = Date.now();
@@ -376,7 +381,9 @@ export default {
       }
 
       if (url.pathname === "/api/love/signal" && request.method === "POST") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        // 🛡️ 柔性降级
+        if (!bucket) return jsonResponse({ success: false, error: "系统未绑定 R2 存储空间，当前为本地展览模式，无法传递信号。" }, 200);
+
         let body = {};
         try { body = await request.json(); } catch (_) { return jsonResponse({ success: false, error: "数据格式错误" }, 400); }
         const stage = String(body.stage || "dating");
@@ -419,7 +426,9 @@ export default {
       }
 
       if (url.pathname === "/api/love/signal/ack" && request.method === "POST") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        // 🛡️ 柔性降级
+        if (!bucket) return jsonResponse({ success: false, error: "系统未绑定 R2 存储空间，当前为本地展览模式，无法响应信号。" }, 200);
+
         let body = {}; try { body = await request.json(); } catch (_) { return jsonResponse({ success: false, error: "数据格式错误" }, 400); }
         const signalId = String(body.signalId || "").trim();
         const responderGender = String(body.responderGender || "girl");
@@ -450,13 +459,16 @@ export default {
       }
 
       if (url.pathname === "/api/love/signal/history" && request.method === "GET") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        // 🛡️ 柔性降级
+        if (!bucket) return jsonResponse({ success: true, history: [], isLocalMode: true });
+
         let signalData = { history: [] }; try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
         return jsonResponse({ success: true, history: signalData.history || [] });
       }
 
       if (url.pathname === "/api/love/signal/clear" && request.method === "POST") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        if (!bucket) return jsonResponse({ success: false, error: "系统未绑定 R2 存储空间，无法操作。" }, 200);
+
         let signalData = { activeSignal: null, history: [] }; try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
         signalData.activeSignal = null;
         await bucket.put(SIGNALS_KEY, JSON.stringify(signalData, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
@@ -465,7 +477,8 @@ export default {
 
       // 🌟 5. 文件上传与配额控制
       if (url.pathname === "/api/love/upload" && request.method === "POST") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        if (!bucket) return jsonResponse({ success: false, error: "系统未绑定 R2 存储空间，无法上传文件。" }, 200);
+
         const formData = await request.formData(); 
         const file = formData.get("file");
         if (!file) return jsonResponse({ success: false, error: "未接收到文件" }, 400);
@@ -495,12 +508,17 @@ export default {
 
       // 🌟 6. 宠物数据读写
       if (url.pathname === "/api/love/pet") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         if (request.method === "GET") {
+          // 🛡️ 柔性降级
+          if (!bucket) return jsonResponse({ success: true, petData: null, isLocalMode: true });
+
           try { const obj = await bucket.get(CONFIG_KEY); if (obj) { const cfg = JSON.parse(await obj.text()); return jsonResponse({ success: true, petData: cfg.petData || null }); } } catch (_) {}
           return jsonResponse({ success: true, petData: null });
         }
         if (request.method === "POST") {
+          // 🛡️ 柔性降级
+          if (!bucket) return jsonResponse({ success: false, error: "系统未绑定 R2 存储，当前处于本地展览模式，无法写入灵宠数据。" }, 200);
+
           let reqData = {}; try { reqData = await request.json(); } catch (_) {}
           const newPetData = reqData.petData; if (!newPetData) return jsonResponse({ success: false, error: "无数据" }, 400);
           if (!sanitizeSanctity(JSON.stringify(newPetData))) return jsonResponse({ success: false, error: "言语不洁" }, 406);
@@ -638,18 +656,20 @@ export default {
       }
 
       if (url.pathname === "/api/diary/data" && request.method === "GET") {
+        // 🛡️ 柔性降级
+        if (!bucket) return jsonResponse({ success: true, exists: false, data: null, isLocalMode: true });
+
         let parsedData = null;
-        if (bucket) {
-          try {
-            const obj = await bucket.get(DIARY_KEY);
-            if (obj) parsedData = JSON.parse(await obj.text());
-          } catch (_) {}
-        }
+        try {
+          const obj = await bucket.get(DIARY_KEY);
+          if (obj) parsedData = JSON.parse(await obj.text());
+        } catch (_) {}
         return jsonResponse({ success: true, exists: !!parsedData, data: parsedData });
       }
 
       if (url.pathname === "/api/diary/save" && request.method === "POST") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        if (!bucket) return jsonResponse({ success: false, error: "系统未绑定 R2 存储空间，无法保存日记。" }, 200);
+
         let reqData; 
         try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false }, 400); }
 
@@ -669,7 +689,7 @@ export default {
 
       // 🌟 9. R2 存储读取代理
       if (url.pathname.startsWith("/raw/")) {
-        if (!bucket) return new Response("Bucket Not Found", { status: 500 });
+        if (!bucket) return new Response("Bucket Not Found (Local Mode)", { status: 404 });
         const key = decodeURIComponent(url.pathname.replace(/^\/raw\//, ""));
         const rangeHeader = request.headers.get("Range");
         let r2Options = {};
@@ -680,7 +700,7 @@ export default {
         if (r2Options.range && object.range) { headers.set("Content-Range", `bytes ${object.range.offset}-${object.range.offset + object.range.length - 1}/${object.size}`); return new Response(object.body, { status: 206, headers }); }
         return new Response(object.body, { headers });
       }
-    } catch (err) { return jsonResponse({ success: false, error: err.message }, 500); }
+    } catch (err) { return jsonResponse({ success: false, error: err.message, stack: err.stack }, 500); }
 
     if (env.ASSETS) { try { return await env.ASSETS.fetch(request); } catch (e) { return new Response("Not Found", { status: 404 }); } }
     return new Response("Not Found", { status: 404 });
