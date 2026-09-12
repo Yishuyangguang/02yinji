@@ -1,7 +1,7 @@
 /**
  * 恋爱时光轴 & 漫游宇宙 (Love Universe)
  * 文件名: css/components.css
- * 核心升级：顶部悬浮音乐胶囊 + 全局星轨中枢无限弹窗 + 全屏沉浸分幕 + 灵宠入口收编
+ * 核心升级：顶部悬浮音乐胶囊 + 全局星轨中枢无限弹窗 + 彻底消灭幽灵点击穿透
  */
 
 /* ================= 基础背景层 ================= */
@@ -23,7 +23,6 @@
 }
 
 /* ================= 🕊️ 灵宠入口全局收编 ================= */
-/* 彻底将灵宠入口收编至中枢，隐藏原悬浮挂件以保持主界面极简纯净 */
 .grace-pet-widget,
 #grace-pet-widget,
 [class*="grace-pet-widget"] {
@@ -481,12 +480,13 @@
   position: fixed; inset: 0; z-index: 65000;
   background: rgba(3, 7, 18, 0.6);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.3s var(--ease-spring);
+  /* 🌟 核心：visibility hidden 防止其子元素即便透明也能截获点击！ */
+  opacity: 0; pointer-events: none; visibility: hidden;
+  transition: opacity 0.3s var(--ease-spring), visibility 0.3s;
   display: flex; flex-direction: column; justify-content: flex-end; 
 }
 .hub-modal-overlay.active {
-  opacity: 1; pointer-events: auto;
+  opacity: 1; pointer-events: auto; visibility: visible;
 }
 
 .hub-modal-dialog {
@@ -567,7 +567,7 @@
   position: relative;
   overflow: hidden;
   user-select: none;
-  pointer-events: auto;
+  /* 🌟 注意：坚决不能加 pointer-events: auto; 否则闭合时也会形成幽灵遮挡！ */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: all 0.28s var(--ease-spring);
@@ -680,7 +680,7 @@
   -webkit-backdrop-filter: blur(16px);
   z-index: 45000;
   opacity: 0;
-  visibility: hidden;
+  visibility: hidden; /* 🌟 */
   pointer-events: none;
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
 }
@@ -719,7 +719,7 @@
   flex-direction: column;
   overflow: hidden;
   opacity: 0;
-  visibility: hidden;
+  visibility: hidden; /* 🌟 */
   transform: translateY(30px) scale(0.96);
   pointer-events: none;
   transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s;
@@ -1407,7 +1407,6 @@
 /* ================= 🌟 全局星轨中枢触发器 ================= */
 .global-hub-trigger {
   position: fixed;
-  /* 🌟 核心：为防止底部拥挤和触控死区，将按钮适度上移 */
   bottom: max(48px, env(safe-area-inset-bottom, 48px));
   right: max(24px, env(safe-area-inset-right, 24px));
   z-index: 55000;
@@ -1765,10 +1764,11 @@
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.5s;
+  visibility: hidden; /* 🌟 */
+  transition: opacity 0.5s, visibility 0.5s;
 }
 
-.bd-3d-modal.active { opacity: 1; pointer-events: auto; }
+.bd-3d-modal.active { opacity: 1; pointer-events: auto; visibility: visible; }
 
 .bd-3d-overlay {
   position: absolute;
@@ -2054,16 +2054,13 @@
   .stage-modal__title { font-size: 14.5px; }
   .stage-modal__body { padding: 16px 12px; }
 
-  /* 顶部音乐胶囊与全局呼出按钮移动端适配 */
   .top-music-capsule { left: 10px; top: max(10px, env(safe-area-inset-top, 10px)); padding: 3px 4px; }
   .music-info { max-width: 60px; }
   .music-title { font-size: 11px; }
   
-  /* 🌟 核心：为防止底部拥挤和触控死区，将按钮移动端同样适度上移 */
   .global-hub-trigger { bottom: max(36px, env(safe-area-inset-bottom, 36px)); right: 20px; width: 50px; height: 50px; }
   .global-hub-icon { font-size: 24px; }
 
-  /* 星轨功能中枢弹窗的移动端设配 */
   .hub-modal-dialog {
     border-radius: 26px 26px 0 0;
     padding: 20px 16px max(16px, env(safe-area-inset-bottom));
