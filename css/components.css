@@ -1,7 +1,7 @@
 /**
  * 恋爱时光轴 & 漫游宇宙 (Love Universe)
  * 文件名: css/components.css
- * 核心升级：顶部悬浮音乐胶囊 + 预留全局星轨中枢按钮 + 全屏沉浸分幕 + 科幻门禁舱
+ * 核心升级：顶部悬浮音乐胶囊 + 全局星轨中枢无限弹窗 + 全屏沉浸分幕 + 科幻门禁舱
  */
 
 /* ================= 基础背景层 ================= */
@@ -464,60 +464,77 @@
   transition: color 0.3s ease;
 }
 
-/* ================= 🌟 星轨功能中枢 (3x3 完美九宫格对称) ================= */
-.hub-dock {
-  background: var(--bg-card, var(--space-card));
-  border: 1.5px solid var(--border-card, var(--glass-border));
-  border-radius: 28px;
-  padding: 26px 20px;
-  box-shadow: var(--card-shadow, var(--glass-shadow)), 0 0 30px rgba(245, 158, 11, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  max-width: 680px;
-  margin: 0 auto 36px;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 20;
+/* ================= 🌟 抽屉式全局星轨功能中枢 (重构) ================= */
+.hub-modal-overlay {
+  position: fixed; inset: 0; z-index: 65000;
+  background: rgba(3, 7, 18, 0.6);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s var(--ease-spring);
+  display: flex; flex-direction: column; justify-content: flex-end; 
+}
+.hub-modal-overlay.active {
+  opacity: 1; pointer-events: auto;
 }
 
-.hub-dock__header {
-  text-align: center;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 50;
+.hub-modal-dialog {
+  background: var(--bg-card, rgba(15, 23, 42, 0.85));
+  border: 1.5px solid var(--border-card, rgba(255, 255, 255, 0.15));
+  border-bottom: none;
+  border-radius: 32px 32px 0 0;
+  padding: 24px 20px max(24px, env(safe-area-inset-bottom));
+  width: 100%; max-width: 680px; margin: 0 auto;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(245, 158, 11, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.4s var(--ease-spring);
+  display: flex; flex-direction: column;
+  max-height: 85vh;
 }
 
-.hub-dock__header .longpress-overlay {
-  position: absolute;
-  inset: -15px -10px;
-  z-index: 9999 !important;
-  cursor: pointer;
-  pointer-events: auto !important;
-  -webkit-user-select: none !important;
-  user-select: none !important;
-  -webkit-touch-callout: none !important;
+@media (min-width: 681px) {
+  .hub-modal-overlay { justify-content: center; padding: 20px; }
+  .hub-modal-dialog {
+    border-bottom: 1.5px solid var(--border-card, rgba(255, 255, 255, 0.15));
+    border-radius: 28px;
+    transform: translateY(40px) scale(0.95);
+    max-height: 90vh;
+  }
+}
+.hub-modal-dialog.active {
+  transform: translateY(0) scale(1);
 }
 
-.hub-dock__badge {
-  font-size: 9.5px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  color: var(--rose-gold);
-  background: rgba(251, 113, 133, 0.12);
-  border: 1px solid rgba(251, 113, 133, 0.3);
-  padding: 2px 10px;
-  border-radius: 16px;
-  display: inline-block;
-  margin-bottom: 6px;
+.hub-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.hub-modal-title-box { display: flex; flex-direction: column; gap: 4px; }
+.hub-modal-badge {
+  font-size: 10px; font-weight: 900; letter-spacing: 2px;
+  color: var(--rose-gold); background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.3); padding: 3px 10px;
+  border-radius: 16px; display: inline-table; width: fit-content;
+}
+.hub-modal-title { font-size: 18px; font-weight: 900; color: var(--text-hero, #fde68a); letter-spacing: 1px; }
+.hub-modal-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border);
+  color: #fff; font-size: 14px; font-weight: 900; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease;
+}
+.hub-modal-close:hover { background: var(--primary-pink); border-color: var(--primary-pink); transform: rotate(90deg) scale(1.1); }
+
+.hub-modal-body {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+  overscroll-behavior: contain;
 }
 
-.hub-dock__title {
-  font-size: 16px;
-  font-weight: 900;
-  color: var(--text-hero, #fde68a);
-  letter-spacing: 1px;
-}
-
+/* 原有 3x3 完美九宫格卡片引擎移植 */
 .hub-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -604,6 +621,43 @@
   color: var(--text-muted, #94a3b8);
   line-height: 1.2;
 }
+
+/* 高级权限区专属分隔与操作按钮 */
+.hub-modal-divider {
+  display: flex; align-items: center; text-align: center;
+  margin: 28px 0 16px; color: var(--text-muted); font-size: 12px; font-weight: 800; letter-spacing: 1px;
+}
+.hub-modal-divider::before, .hub-modal-divider::after {
+  content: ''; flex: 1; border-bottom: 1px dashed rgba(255,255,255,0.15);
+}
+.hub-modal-divider span { padding: 0 14px; color: rgba(255,255,255,0.4); }
+
+.hub-management-area {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  padding-bottom: 10px;
+}
+.hub-mgmt-btn {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px; padding: 16px 14px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; text-align: left; transition: all 0.25s var(--ease-spring);
+}
+.hub-mgmt-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(245, 158, 11, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+.hub-mgmt-icon {
+  font-size: 24px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+  flex-shrink: 0;
+}
+.hub-mgmt-text { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.hub-mgmt-title { font-size: 13.5px; font-weight: 800; color: #fff; }
+.hub-mgmt-desc { font-size: 10.5px; font-weight: 600; color: #94a3b8; }
+.hub-mgmt-arrow { color: rgba(255,255,255,0.3); font-size: 14px; font-weight: 900; transition: color 0.2s; }
+.hub-mgmt-btn:hover .hub-mgmt-arrow { color: #f59e0b; transform: translateX(2px); }
 
 /* ================= 🎪 全屏沉浸分幕系统 (Stage Modals) ================= */
 .stage-overlay {
@@ -1338,7 +1392,7 @@
 .play-pause .heart-music-icon { font-size: 14px; transition: transform 0.2s; }
 .playing .heart-music-icon { animation: heartBeatPulse 1.2s infinite ease-in-out; }
 
-/* ================= 预留：全局星轨中枢触发器 ================= */
+/* ================= 🌟 全局星轨中枢触发器 ================= */
 .global-hub-trigger {
   position: fixed;
   bottom: max(24px, env(safe-area-inset-bottom, 24px));
@@ -1981,13 +2035,6 @@
   .love-timer__num { font-size: 18px; }
   .love-timer__label { font-size: 9px; }
 
-  .hub-dock { padding: 18px 12px; border-radius: 22px; margin-bottom: 24px; }
-  .hub-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .hub-btn { padding: 12px 8px; border-radius: 16px; }
-  .hub-btn__icon { font-size: 24px; margin-bottom: 4px; }
-  .hub-btn__title { font-size: 11px; }
-  .hub-btn__desc { display: none; }
-
   .stage-container { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) 8px; }
   .stage-modal { inset: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) 8px; border-radius: 22px; }
   .stage-modal__header { padding: 12px 16px; }
@@ -2000,6 +2047,18 @@
   .music-title { font-size: 11px; }
   .global-hub-trigger { bottom: max(16px, env(safe-area-inset-bottom, 16px)); right: 16px; width: 48px; height: 48px; }
   .global-hub-icon { font-size: 22px; }
+
+  /* 星轨功能中枢弹窗的移动端设配 */
+  .hub-modal-dialog {
+    border-radius: 26px 26px 0 0;
+    padding: 20px 16px max(16px, env(safe-area-inset-bottom));
+  }
+  .hub-modal-header { margin-bottom: 16px; padding-bottom: 12px; }
+  .hub-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .hub-btn { padding: 12px 8px; border-radius: 16px; }
+  .hub-btn__icon { font-size: 24px; margin-bottom: 4px; }
+  .hub-btn__title { font-size: 11px; }
+  .hub-btn__desc { display: none; }
 
   .playlist-drawer { left: 12px; bottom: calc(max(16px, env(safe-area-inset-bottom, 16px)) + 54px); width: calc(100vw - 24px); max-width: 320px; max-height: 320px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
   
