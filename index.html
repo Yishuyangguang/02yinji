@@ -267,7 +267,7 @@
     <button class="perspective-btn" id="btn-perspective-girl" onclick="window.ThemeEngine.switchPerspective('girl')">🌸 她的花汐</button>
   </div>
 
-  <!-- 顶部毛玻璃悬浮音乐胶囊 -->
+  <!-- 🌟 优化：顶部悬浮音乐胶囊，注入实时响应物理级切换逻辑 -->
   <aside class="top-music-capsule" id="vinyl-player">
     <div class="music-capsule-inner" id="heart-music-capsule" title="点击展开专属歌单">
       <div class="music-cover-wrap">
@@ -283,7 +283,8 @@
       <button class="music-ctrl-btn" onclick="event.stopPropagation(); if(window.LoveMusicEngine) window.LoveMusicEngine.playPrev()" title="上一首">
         <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       </button>
-      <button class="music-ctrl-btn play-pause" id="music-btn-toggle" onclick="event.stopPropagation(); if(window.LoveMusicEngine) window.LoveMusicEngine.togglePlay(); else { const caps = document.getElementById('heart-music-capsule'); if(caps) caps.click(); }" title="播放/暂停">
+      <!-- 物理级 class 实时切换，消除 UI 延迟感 -->
+      <button class="music-ctrl-btn play-pause" id="music-btn-toggle" onclick="event.stopPropagation(); document.getElementById('vinyl-player').classList.toggle('playing'); if(window.LoveMusicEngine) window.LoveMusicEngine.togglePlay();" title="播放/暂停">
          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8 5v14l11-7z"/></svg>
       </button>
       <button class="music-ctrl-btn" onclick="event.stopPropagation(); if(window.LoveMusicEngine) window.LoveMusicEngine.playNext()" title="下一首">
@@ -292,7 +293,6 @@
     </div>
   </aside>
 
-  <!-- 🌟 重构：全局高颜值星轨中枢触发器 (适度上移) -->
   <button class="global-hub-trigger" id="global-hub-trigger" title="开启星轨中枢" onclick="openGlobalHub()">
     <span class="global-hub-icon">🌌</span>
   </button>
@@ -347,6 +347,11 @@
       </div>
     </header>
 
+    <!-- 🌟 新增：打字机上方的纪念日卡片速览区 -->
+    <section id="anniversary-preview-section" class="anniversary-preview-section" style="display: none;">
+        <div class="anni-preview-grid" id="anni-preview-grid"></div>
+    </section>
+
     <section class="confession-section">
       <div class="confession-card">
         <h3 class="confession-card__title" id="letter-title">致我生命中的唯一</h3>
@@ -362,11 +367,11 @@
     </section>
 
     <footer class="universe-footer">
-      <p class="universe-footer__text">✨ 爱情坚强如死，众水不能熄灭 · 雅歌之印 ✨</p>
+      <!-- 🌟 更新版权文字与交互引导 -->
+      <p class="universe-footer__text" id="footer-contact-trigger">✨ 点击联系「印记」站长 ✨</p>
     </footer>
   </main>
 
-  <!-- 🌟 重构：全局可滚动的无限扩展星轨功能中枢弹窗 -->
   <div id="global-hub-modal" class="hub-modal-overlay" onclick="closeGlobalHub(event)">
     <div class="hub-modal-dialog" id="global-hub-dialog" onclick="event.stopPropagation()">
       <div class="hub-modal-header">
@@ -397,7 +402,7 @@
           </div>
           <div class="hub-btn" data-open-stage="icebreaker" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('icebreaker')">
             <div class="hub-btn__glow"></div>
-            <span class="hub-btn__icon">💌</span> <!-- 修改了图标，避免与灵宠重复 -->
+            <span class="hub-btn__icon">💌</span>
             <div class="hub-btn__info">
               <span class="hub-btn__title">破冰和解</span>
               <span class="hub-btn__desc">情感信号箱 · 避风港</span>
@@ -451,7 +456,6 @@
               <span class="hub-btn__desc">3D时空贺卡 · 永存</span>
             </div>
           </div>
-          <!-- 🌟 新增：恩典灵宠入口，收编于功能中枢 -->
           <div class="hub-btn" onclick="closeGlobalHub(); openGracePet()">
             <div class="hub-btn__glow"></div>
             <span class="hub-btn__icon">🕊️</span>
@@ -462,7 +466,6 @@
           </div>
         </div>
 
-        <!-- 收编的高级权限入口 -->
         <div class="hub-modal-divider"><span>🔮 高级管理与契约秘境</span></div>
         <div class="hub-management-area">
           <button class="hub-mgmt-btn" onclick="openAdminAuthModal()">
@@ -498,6 +501,18 @@
         <button class="hq-btn-confirm" id="hq-admin-confirm">验证</button>
       </div>
     </div>
+  </div>
+
+  <!-- 🌟 新增：高级黑金边框微信二维码弹窗 -->
+  <div class="wechat-qr-modal" id="wechat-qr-modal">
+      <div class="wechat-qr-dialog">
+          <button class="wechat-qr-close" onclick="closeWeChatQrModal()">✕</button>
+          <div class="wechat-qr-title">✨ 扫码联系站长 ✨</div>
+          <div class="wechat-qr-img-box">
+              <img src="微信二维码.jpg" alt="微信二维码" onerror="this.style.display='none'; this.parentNode.innerHTML='<span style=\'color:#ef4444; font-size:14px; font-weight:800;\'>⚠️ 图片加载失败，请确保根目录存在 微信二维码.jpg 文件</span>';" />
+          </div>
+          <div class="wechat-qr-desc">雅歌之印 · 恒久契约专属服务</div>
+      </div>
   </div>
 
   <div id="stage-modal-overlay" class="stage-overlay" onclick="if(window.StageManager) window.StageManager.closeStage()"></div>
@@ -734,7 +749,6 @@
                         document.getElementById('grace-pet-widget') || 
                         document.querySelector('[class*="pet-widget"]');
       if (petWidget) {
-        // 物理点击模拟，确保原有 pet.js 拦截器不受影响
         const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
         petWidget.dispatchEvent(clickEvent);
       } else if (window.GracePetManager && window.GracePetInstance) {
@@ -761,6 +775,23 @@
         document.getElementById('secret-owner-modal').classList.add('active');
       }, 300);
     }
+
+    // 🌟 全局呼出微信二维码名片弹窗
+    window.showWeChatQrModal = function() {
+        const modal = document.getElementById("wechat-qr-modal");
+        if (modal) {
+            modal.style.display = "flex";
+            setTimeout(() => modal.classList.add("active"), 10);
+        }
+    };
+    
+    window.closeWeChatQrModal = function() {
+        const modal = document.getElementById("wechat-qr-modal");
+        if (modal) {
+            modal.classList.remove("active");
+            setTimeout(() => modal.style.display = "none", 300);
+        }
+    };
 
     function showGuestAlert() {
       const t = document.getElementById("guestAlertToast");
