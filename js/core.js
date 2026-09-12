@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================================
-  // 🔐 高颜值统一下拉/双击密码呼出逻辑
+  // 🔐 高颜值统一下拉/双击/名字密码呼出逻辑
   // ============================================================================
   function initGlobalAuthModal() {
     const trigger = document.getElementById("secretKeyholeTrigger");
@@ -206,6 +206,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.IS_ADMIN) showAuthError("✨ 当前设备已是持印者状态，无需重复鉴证。");
       else showModal();
     };
+
+    // 🌟 恢复：点击名字直达后台控制台（加入物理防穿透与阻止默认行为）
+    if (dom.heroNames) {
+      dom.heroNames.style.cursor = 'pointer';
+      dom.heroNames.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.openAdminAuthModal();
+      });
+    }
 
     if (trigger) {
       let lastTap = 0;
@@ -268,7 +278,8 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("love_admin_token", data.token);
           updateFrontendRBAC(true);
           hideModal();
-          showAuthError("✨ 设备鉴证成功，已永久开放核心写权限！");
+          // 如果点击名字验证成功后，自动跳转管理页面，体验更连贯
+          location.href = "admin.html";
         } else {
           if (errorText) { errorText.textContent = "❌ 密钥错误或无权限"; errorText.style.display = "block"; }
         }
