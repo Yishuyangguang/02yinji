@@ -198,19 +198,6 @@
       backdrop-filter: blur(12px); z-index: 999999; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .guest-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    
-    .hub-dock__header {
-      -webkit-user-select: none !important;
-      user-select: none !important;
-      -webkit-touch-callout: none !important;
-    }
-    .longpress-overlay {
-      position: absolute; inset: -15px -10px; z-index: 9999 !important; cursor: pointer; border-radius: inherit;
-      -webkit-user-select: none !important;
-      user-select: none !important;
-      -webkit-touch-callout: none !important;
-      pointer-events: auto !important;
-    }
 
     body:not(.is-owner) #scratch-container { display: none !important; }
     body:not(.is-owner) #scratch-guest-lock { display: block !important; }
@@ -280,7 +267,7 @@
     <button class="perspective-btn" id="btn-perspective-girl" onclick="window.ThemeEngine.switchPerspective('girl')">🌸 她的花汐</button>
   </div>
 
-  <!-- 🌟 重构：顶部毛玻璃悬浮音乐胶囊 -->
+  <!-- 顶部毛玻璃悬浮音乐胶囊 -->
   <aside class="top-music-capsule" id="vinyl-player">
     <div class="music-capsule-inner" id="heart-music-capsule" title="点击展开专属歌单">
       <div class="music-cover-wrap">
@@ -305,8 +292,8 @@
     </div>
   </aside>
 
-  <!-- 🌟 重构预留：全局高颜值星轨中枢触发器 -->
-  <button class="global-hub-trigger" id="global-hub-trigger" title="开启星轨中枢">
+  <!-- 🌟 重构：全局高颜值星轨中枢触发器 -->
+  <button class="global-hub-trigger" id="global-hub-trigger" title="开启星轨中枢" onclick="openGlobalHub()">
     <span class="global-hub-icon">🌌</span>
   </button>
 
@@ -374,94 +361,121 @@
       </div>
     </section>
 
-    <!-- 星轨功能中枢导航网格 -->
-    <nav class="hub-dock" id="hub-dock">
-      <div class="hub-dock__header" style="position: relative;">
-        <!-- 🌟 双击感应透明层 -->
-        <div class="longpress-overlay" id="secretKeyholeTrigger" title="快速双击唤醒持印者密钥"></div>
-        <span class="hub-dock__badge">SACRED ARCHIVES</span>
-        <h2 class="hub-dock__title">星轨功能中枢 · 契约秘境</h2>
-      </div>
-      <div class="hub-grid">
-        <div class="hub-btn" data-open-stage="timeline" onclick="if(window.StageManager) window.StageManager.openStage('timeline')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">🪐</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">时光轨迹</span>
-            <span class="hub-btn__desc">雅歌印记 · 3D拍立得</span>
-          </div>
-        </div>
-        <div class="hub-btn" data-open-stage="anniversary" onclick="if(window.StageManager) window.StageManager.openStage('anniversary')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">📅</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">时光刻度</span>
-            <span class="hub-btn__desc">恒久倒数 · 恩典纪念</span>
-          </div>
-        </div>
-        <div class="hub-btn" data-open-stage="icebreaker" onclick="if(window.StageManager) window.StageManager.openStage('icebreaker')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">🕊️</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">破冰和解</span>
-            <span class="hub-btn__desc">情感信号箱 · 避风港</span>
-          </div>
-        </div>
-        <div class="hub-btn" onclick="window.open('checklist.html', '_blank')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">📝</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">同行清单</span>
-            <span class="hub-btn__desc">阶段待办 · 100件心愿</span>
-          </div>
-        </div>
-        <div class="hub-btn" onclick="window.open('diary.html', '_blank')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">📔</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">我们的日记</span>
-            <span class="hub-btn__desc">酸甜苦辣 · 记录生活</span>
-          </div>
-        </div>
-        <div class="hub-btn" data-open-stage="badges" onclick="if(window.StageManager) window.StageManager.openStage('badges')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">🎖️</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">圣约印记</span>
-            <span class="hub-btn__desc">成就徽章 · 荣誉陈列</span>
-          </div>
-        </div>
-        <div class="hub-btn" data-open-stage="scratch" onclick="if(window.StageManager) window.StageManager.openStage('scratch')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">🎟️</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">舍己特权</span>
-            <span class="hub-btn__desc">包容特权券 · 刮刮乐</span>
-          </div>
-        </div>
-        <div class="hub-btn" data-open-stage="poster" onclick="if(window.StageManager) window.StageManager.openStage('poster')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">📸</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">数字永存</span>
-            <span class="hub-btn__desc">超清海报 · 单文件铸造</span>
-          </div>
-        </div>
-        <div class="hub-btn" data-open-stage="birthday" onclick="if(window.StageManager) window.StageManager.openStage('birthday')">
-          <div class="hub-btn__glow"></div>
-          <span class="hub-btn__icon">🎂</span>
-          <div class="hub-btn__info">
-            <span class="hub-btn__title">生日盲盒</span>
-            <span class="hub-btn__desc">3D时空贺卡 · 永存</span>
-          </div>
-        </div>
-      </div>
-    </nav>
-
     <footer class="universe-footer">
       <p class="universe-footer__text">✨ 爱情坚强如死，众水不能熄灭 · 雅歌之印 ✨</p>
     </footer>
   </main>
+
+  <!-- 🌟 重构：全局可滚动的无限扩展星轨功能中枢弹窗 -->
+  <div id="global-hub-modal" class="hub-modal-overlay" onclick="closeGlobalHub(event)">
+    <div class="hub-modal-dialog" id="global-hub-dialog" onclick="event.stopPropagation()">
+      <div class="hub-modal-header">
+        <div class="hub-modal-title-box">
+          <span class="hub-modal-badge">SACRED ARCHIVES</span>
+          <h2 class="hub-modal-title">星轨功能中枢</h2>
+        </div>
+        <button class="hub-modal-close" onclick="closeGlobalHub()">✕</button>
+      </div>
+      
+      <div class="hub-modal-body">
+        <div class="hub-grid">
+          <div class="hub-btn" data-open-stage="timeline" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('timeline')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">🪐</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">时光轨迹</span>
+              <span class="hub-btn__desc">雅歌印记 · 3D拍立得</span>
+            </div>
+          </div>
+          <div class="hub-btn" data-open-stage="anniversary" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('anniversary')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">📅</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">时光刻度</span>
+              <span class="hub-btn__desc">恒久倒数 · 恩典纪念</span>
+            </div>
+          </div>
+          <div class="hub-btn" data-open-stage="icebreaker" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('icebreaker')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">🕊️</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">破冰和解</span>
+              <span class="hub-btn__desc">情感信号箱 · 避风港</span>
+            </div>
+          </div>
+          <div class="hub-btn" onclick="closeGlobalHub(); window.open('checklist.html', '_blank')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">📝</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">同行清单</span>
+              <span class="hub-btn__desc">阶段待办 · 100件心愿</span>
+            </div>
+          </div>
+          <div class="hub-btn" onclick="closeGlobalHub(); window.open('diary.html', '_blank')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">📔</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">我们的日记</span>
+              <span class="hub-btn__desc">酸甜苦辣 · 记录生活</span>
+            </div>
+          </div>
+          <div class="hub-btn" data-open-stage="badges" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('badges')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">🎖️</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">圣约印记</span>
+              <span class="hub-btn__desc">成就徽章 · 荣誉陈列</span>
+            </div>
+          </div>
+          <div class="hub-btn" data-open-stage="scratch" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('scratch')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">🎟️</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">舍己特权</span>
+              <span class="hub-btn__desc">包容特权券 · 刮刮乐</span>
+            </div>
+          </div>
+          <div class="hub-btn" data-open-stage="poster" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('poster')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">📸</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">数字永存</span>
+              <span class="hub-btn__desc">超清海报 · 单文件铸造</span>
+            </div>
+          </div>
+          <div class="hub-btn" data-open-stage="birthday" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('birthday')">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">🎂</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">生日盲盒</span>
+              <span class="hub-btn__desc">3D时空贺卡 · 永存</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 收编的高级权限入口 -->
+        <div class="hub-modal-divider"><span>🔮 高级管理与契约秘境</span></div>
+        <div class="hub-management-area">
+          <button class="hub-mgmt-btn" onclick="openAdminAuthModal()">
+            <div class="hub-mgmt-icon">⚙️</div>
+            <div class="hub-mgmt-text">
+              <span class="hub-mgmt-title">系统后台控制</span>
+              <span class="hub-mgmt-desc">全局参数与数据配置</span>
+            </div>
+            <span class="hub-mgmt-arrow">➔</span>
+          </button>
+          <button class="hub-mgmt-btn" onclick="openSecretOwnerModal()">
+            <div class="hub-mgmt-icon">🗝️</div>
+            <div class="hub-mgmt-text">
+              <span class="hub-mgmt-title">契约秘境封印</span>
+              <span class="hub-mgmt-desc">持印者设备升权与认证</span>
+            </div>
+            <span class="hub-mgmt-arrow">➔</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="hq-admin-auth-modal" class="hq-auth-modal">
     <div class="hq-auth-dialog">
@@ -686,6 +700,39 @@
   <script src="js/core.js?v=2.5"></script>
   
   <script>
+    // 🌟 星轨中枢弹窗全局控制引擎
+    function openGlobalHub() {
+      const modal = document.getElementById('global-hub-modal');
+      const dialog = document.getElementById('global-hub-dialog');
+      if(modal && dialog) {
+        modal.classList.add('active');
+        requestAnimationFrame(() => dialog.classList.add('active'));
+      }
+    }
+    
+    function closeGlobalHub(e) {
+      const modal = document.getElementById('global-hub-modal');
+      const dialog = document.getElementById('global-hub-dialog');
+      if(modal && dialog) {
+        dialog.classList.remove('active');
+        setTimeout(() => modal.classList.remove('active'), 300);
+      }
+    }
+
+    function openAdminAuthModal() {
+      closeGlobalHub();
+      setTimeout(() => {
+        document.getElementById('hq-admin-auth-modal').classList.add('active');
+      }, 300);
+    }
+
+    function openSecretOwnerModal() {
+      closeGlobalHub();
+      setTimeout(() => {
+        document.getElementById('secret-owner-modal').classList.add('active');
+      }, 300);
+    }
+
     function showGuestAlert() {
       const t = document.getElementById("guestAlertToast");
       if(t) {
@@ -769,39 +816,9 @@
       if (window.BirthdayInstance) {
         window.BirthdayInstance.init();
       }
-
       if (window.ScratchCardManager && window.LOVE_CONFIG) {
         window.ScratchCardInstance = new window.ScratchCardManager(window.LOVE_CONFIG);
         window.ScratchCardInstance.init();
-      }
-
-      // 🌟 针对 iPhone 14 Pro 等移动端优化的“双击快速唤醒”引擎
-      const triggerArea = document.getElementById("secretKeyholeTrigger");
-      let lastTapTime = 0;
-      
-      const handleSecretTrigger = (e) => {
-        const currentTime = Date.now();
-        const tapInterval = currentTime - lastTapTime;
-        
-        if (tapInterval < 300 && tapInterval > 0) {
-          if (e.cancelable) e.preventDefault();
-          document.getElementById("secret-owner-input").value = "";
-          document.getElementById("secret-owner-modal").classList.add("active");
-          lastTapTime = 0;
-        } else {
-          lastTapTime = currentTime;
-        }
-      };
-
-      if (triggerArea) {
-        triggerArea.addEventListener("touchend", handleSecretTrigger, { passive: false });
-        triggerArea.addEventListener("click", (e) => {
-          if (e.detail === 2) {
-            document.getElementById("secret-owner-input").value = "";
-            document.getElementById("secret-owner-modal").classList.add("active");
-          }
-        });
-        triggerArea.addEventListener("contextmenu", (e) => e.preventDefault());
       }
     });
   </script>
