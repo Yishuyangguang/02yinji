@@ -159,7 +159,6 @@
       }
     }
 
-    /* 🌟 恢复：后台控制台黑金密码验证弹窗样式 */
     .hq-auth-modal {
       position: fixed; inset: 0; z-index: 999999; display: none; align-items: center; justify-content: center;
       background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
@@ -200,7 +199,6 @@
     }
     .guest-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     
-    /* 🌟 核心拦截 1：标题栏禁止选词 */
     .hub-dock__header {
       -webkit-user-select: none !important;
       user-select: none !important;
@@ -214,21 +212,11 @@
       pointer-events: auto !important;
     }
 
-    /* 🌟 核心拦截 2：物理级 CSS 刮刮卡只读隔离盾 */
-    body:not(.is-owner) #scratch-container {
-      display: none !important;
-    }
-    body:not(.is-owner) #scratch-guest-lock {
-      display: block !important;
-    }
-    body.is-owner #scratch-guest-lock {
-      display: none !important;
-    }
-    body.is-owner #scratch-container {
-      display: grid !important;
-    }
+    body:not(.is-owner) #scratch-container { display: none !important; }
+    body:not(.is-owner) #scratch-guest-lock { display: block !important; }
+    body.is-owner #scratch-guest-lock { display: none !important; }
+    body.is-owner #scratch-container { display: grid !important; }
 
-    /* 🌟 核心修复：移动端同行守护计时器 5 联数字卡片自适应防溢出引擎 */
     .love-timer {
       box-sizing: border-box !important;
       max-width: 100% !important;
@@ -268,30 +256,17 @@
     }
 
     @media (max-width: 640px) {
-      .love-timer {
-        padding: 16px 10px !important;
-      }
-      .love-timer__grid {
-        gap: 5px !important;
-      }
-      .love-timer__unit {
-        padding: 8px 1px !important;
-        border-radius: 12px !important;
-      }
-      .love-timer__num {
-        font-size: 18px !important;
-      }
-      .love-timer__label {
-        font-size: 11px !important;
-        margin-top: 3px !important;
-      }
+      .love-timer { padding: 16px 10px !important; }
+      .love-timer__grid { gap: 5px !important; }
+      .love-timer__unit { padding: 8px 1px !important; border-radius: 12px !important; }
+      .love-timer__num { font-size: 18px !important; }
+      .love-timer__label { font-size: 11px !important; margin-top: 3px !important; }
     }
   </style>
 </head>
 <body class="universe-body">
 
   <div id="guestAlertToast" class="guest-toast">💌 展览模式：仅持印者可操作哦~</div>
-
   <div id="universe-bg-layer" class="universe-bg-layer"></div>
 
   <div id="icebreaker-banner" class="icebreaker-banner">
@@ -304,6 +279,36 @@
     <button class="perspective-btn active" id="btn-perspective-boy" onclick="window.ThemeEngine.switchPerspective('boy')">🪐 他的星河</button>
     <button class="perspective-btn" id="btn-perspective-girl" onclick="window.ThemeEngine.switchPerspective('girl')">🌸 她的花汐</button>
   </div>
+
+  <!-- 🌟 重构：顶部毛玻璃悬浮音乐胶囊 -->
+  <aside class="top-music-capsule" id="vinyl-player">
+    <div class="music-capsule-inner" id="heart-music-capsule" title="点击展开专属歌单">
+      <div class="music-cover-wrap">
+        <img id="vinyl-cover" class="music-cover" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'" decoding="async">
+        <div class="music-pulse"></div>
+        <span class="heart-music-icon" id="heart-music-icon" style="position:absolute; z-index:2; font-size:12px;">❤️</span>
+      </div>
+      <div class="music-info">
+        <span class="music-title" id="music-current-title">恒久印记流转中...</span>
+      </div>
+    </div>
+    <div class="music-controls">
+      <button class="music-ctrl-btn" onclick="event.stopPropagation(); if(window.LoveMusicEngine) window.LoveMusicEngine.playPrev()" title="上一首">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      <button class="music-ctrl-btn play-pause" id="music-btn-toggle" onclick="event.stopPropagation(); if(window.LoveMusicEngine) window.LoveMusicEngine.togglePlay(); else { const caps = document.getElementById('heart-music-capsule'); if(caps) caps.click(); }" title="播放/暂停">
+         <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="music-ctrl-btn" onclick="event.stopPropagation(); if(window.LoveMusicEngine) window.LoveMusicEngine.playNext()" title="下一首">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 🌟 重构预留：全局高颜值星轨中枢触发器 -->
+  <button class="global-hub-trigger" id="global-hub-trigger" title="开启星轨中枢">
+    <span class="global-hub-icon">🌌</span>
+  </button>
 
   <div id="parallax-photo-wall" class="parallax-photo-wall"></div>
   <canvas id="starry-canvas" class="universe-canvas"></canvas>
@@ -458,7 +463,6 @@
     </footer>
   </main>
 
-  <!-- 🌟 补齐：后台管理验证控制台模态框 DOM -->
   <div id="hq-admin-auth-modal" class="hq-auth-modal">
     <div class="hq-auth-dialog">
       <div class="hq-auth-icon">⚙️</div>
@@ -546,7 +550,6 @@
           <span class="section-title__desc">真实刮开涂层 · 点击核销印章锁定承诺</span>
         </div>
         
-        <!-- 🌟 物理级 3D 黑金锁定面板 -->
         <div id="scratch-guest-lock" style="display:none; text-align:center; padding:48px 24px; background:var(--bg-card, rgba(255,255,255,0.03)); border:1.5px dashed var(--border-card, rgba(255,255,255,0.15)); border-radius:24px; margin:20px auto; max-width:600px; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
           <span style="font-size:48px; display:block; margin-bottom:14px; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.5));">🔒</span>
           <span style="color:var(--text-hero, #e2e8f0); font-size:18px; font-weight:900; letter-spacing:1px; display:block; margin-bottom:8px;">展览模式：舍己包容特权已锁定</span>
@@ -600,16 +603,6 @@
       </div>
     </div>
   </div>
-
-  <aside class="vinyl-player" id="vinyl-player">
-    <div class="heart-music-capsule" id="heart-music-capsule" title="单击：播放/暂停 | 长按或双击：专属歌单">
-      <div class="heart-music-core">
-        <span class="heart-music-icon">❤️</span>
-        <img id="vinyl-cover" class="heart-music-cover" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'" decoding="async">
-      </div>
-      <div class="heart-music-pulse"></div>
-    </div>
-  </aside>
 
   <div class="playlist-drawer" id="playlist-drawer">
     <div class="playlist-drawer__header">
