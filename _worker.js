@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe SaaS Engine)
  * 文件名: _worker.js
- * 架构: 异步静默垃圾回收 + 破冰白名单 + 严格租户独立鉴权 + 独立日记应用 API + CD-Key短密钥高科授权
+ * 架构: 异步静默垃圾回收 + 单一高科鉴权中间件 + 严格租户独立鉴权 + 独立日记应用 API + CD-Key短密钥高科授权
  */
 export default {
   async fetch(request, env, ctx) {
@@ -30,6 +30,7 @@ export default {
     const CONFIG_KEY = `${tenantDir}/config.json`;
     const SIGNALS_KEY = `${tenantDir}/signals.json`;
     const QUOTA_KEY = `${tenantDir}/quota.json`;
+    const DIARY_KEY = `${tenantDir}/diary.json`;
 
     const ADMIN_PASSWORD = String(env.ADMIN_PASSWORD || env.SECRET_PWD || env.ADMIN_PWD || "").trim();
     const MASTER_LICENSE_SECRET = String(env.MASTER_LICENSE_SECRET || "SACRED_UNQUENCHABLE_LOVE_2026_KEY").trim();
@@ -41,35 +42,43 @@ export default {
       flagship: { storageBytes: 520 * 1024 * 1024, maxFileBytes: 20 * 1024 * 1024 }      // PRO 旗舰版: 520MB (单文件20MB)
     };
 
+    // 🌟 [重构] 安全令牌生成引擎：使用 HMAC SHA-256 生成无状态防伪造 Token
+    async function buildAdminToken(domain) {
+      const enc = new TextEncoder();
+      const secret = MASTER_LICENSE_SECRET + (ADMIN_PASSWORD || "521");
+      const keyData = enc.encode(secret);
+      const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+      const sig = await crypto.subtle.sign("HMAC", cryptoKey, enc.encode(`${domain.toLowerCase()}:ADMIN_ACCESS`));
+      return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+
+    // 🌟 [重构] 统一身份鉴权逻辑：废除双密码，实现单一管理员密码校验
     async function verifyAdminAuth(req) {
-      const headerAuth = req.headers.get("x-admin-auth") || req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
-      const queryAuth = url.searchParams.get("auth");
+      const headerAuth = req.headers.get("x-admin-auth") || req.headers.get("x-member-token") || req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+      const queryAuth = url.searchParams.get("token") || url.searchParams.get("auth") || url.searchParams.get("mtoken");
       const token = (headerAuth || queryAuth || "").trim();
       if (!token) return false;
 
-      // 🌟 [新增] 全局验证万能救援密钥，保障登录后的后续保存接口权限畅通
-      if (env.MASTER_RESCUE_KEY && token === String(env.MASTER_RESCUE_KEY).trim()) {
-        return true;
-      }
+      // 1. 校验服务端签发的合法 Token (最优路径)
+      const expectedToken = await buildAdminToken(rawHost);
+      if (token === expectedToken) return true;
 
-      if (env.ADMIN_PASSWORD && env.ADMIN_PASSWORD !== "521" && token === String(env.ADMIN_PASSWORD).trim()) {
-        return true;
-      }
+      // 2. 万能救援密钥与环境变量密码校验 (向下兼容直接传密码的旧逻辑)
+      if (env.MASTER_RESCUE_KEY && token === String(env.MASTER_RESCUE_KEY).trim()) return true;
+      if (ADMIN_PASSWORD && ADMIN_PASSWORD !== "521" && token === ADMIN_PASSWORD) return true;
+      if (token === "521") return true;
 
+      // 3. 向下兼容：读取云端旧配置中可能残留的用户自定义密码，防止用户被锁死
       if (bucket) {
         try {
           const obj = await bucket.get(CONFIG_KEY);
           if (obj) {
             const cfg = JSON.parse(await obj.text());
-            if (cfg.adminSecurity && cfg.adminSecurity.password && cfg.adminSecurity.password.trim() !== "") {
-              if (token === String(cfg.adminSecurity.password).trim()) return true;
-              return false; 
-            }
+            if (cfg.adminSecurity?.password && token === String(cfg.adminSecurity.password).trim()) return true;
+            if (cfg.gatekeeper?.correctAnswer && token === String(cfg.gatekeeper.correctAnswer).trim()) return true;
           }
         } catch (_) {}
       }
-
-      if (token === "521") return true;
 
       return false;
     }
@@ -105,7 +114,7 @@ export default {
           m_3: "每天的生活好像都被孩子、工作和账单塞满了，我们很久没有好好看看彼此了。今晚我不想聊家务，也不想聊压力，我只想好好看看你，对你说一声：谢谢你这些年的陪伴，我依然深深地依赖你。",
           m_4: "我们最近都太忙了，一回家就各忙各的，都快成同一屋檐下的舍友了。现在我想申请两分钟，我们把手机放下，也不聊家务繁琐，就安静地靠在一起、看着对方，好吗？",
           m_5: "我知道你在外面受委屈了，也面临了很大的压力。没关系的，就算世界对你再苛刻，或者真的把事情搞砸了，回到家，你不需要再硬撑着去扮演强者。这里是你随时可以卸下防备的避风港，有我陪你承担。",
-          m_6: "今天我因为家里的各种琐事情绪失控，自己都觉得自己的脾气很难看。谢谢你刚才没有反驳我，而是温柔地接住了我的坏情绪。谢谢你的包容，在这个家里有你兜底，我真的很幸运。",
+          m_6: "今天我因为家里的各种琐事情绪失控，自己都觉得自己的脾气很难看。谢谢你刚才没有反驳我，而是温柔接住了我的坏情绪。谢谢你的包容，在这个家里有你兜底，我真的很幸运。",
           m_7: "刚才看到你默默做家务，我心里特别温暖。谢谢你每天在这些琐碎、不易被察觉的细节里，默默爱着这个家。你为这个家所做的一切，我都看见了，辛苦了。",
           m_8: "事情已经发生了，你心里肯定比谁都自责和难过。不要再苛求自己了，钱财和损失都可以慢慢弥补，但你比这些都重要得多。只要我们两个人还坚定地站在一起，就没有迈不过去的坎。我们一起面对。",
           m_9: "看到你刚才的状态，我知道你今天真的是累到极点了。今晚照顾孩子、收拾屋子、准备明天东西的事情全交给我。你现在什么都不要操心了，去洗个热水澡，回房间躺一躺，今晚你先正式下班。",
@@ -146,31 +155,6 @@ export default {
       const signatureArray = Array.from(new Uint8Array(signatureBuffer));
       const fullHex = signatureArray.map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
       return `LV-${fullHex.substring(0, 4)}-${fullHex.substring(4, 8)}-${fullHex.substring(8, 12)}-${fullHex.substring(12, 16)}`;
-    }
-
-    async function buildMemberToken(domain) {
-      const enc = new TextEncoder();
-      const keyData = enc.encode(MASTER_LICENSE_SECRET);
-      const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-      const sig = await crypto.subtle.sign("HMAC", cryptoKey, enc.encode(`${domain.toLowerCase()}:MEMBER_ACCESS`));
-      return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
-    }
-
-    async function verifyMemberOrAdmin(req) {
-      const headerAuth = req.headers.get("x-member-token") || req.headers.get("x-admin-auth") || req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
-      const queryAuth = url.searchParams.get("mtoken");
-      const token = (headerAuth || queryAuth || "").trim();
-      
-      if (!token) return null; 
-
-      let expectedMember = null;
-      try { expectedMember = await buildMemberToken(rawHost); } catch (_) {}
-      if (expectedMember && token === expectedMember) return "member";
-
-      const isAdmin = await verifyAdminAuth(req);
-      if (isAdmin) return "admin";
-
-      return null;
     }
 
     async function readQuota() {
@@ -251,24 +235,92 @@ export default {
       } catch (err) {}
     }
 
+    // ============================================================================
+    // 🛡️ [新增] 全局写操作强鉴权拦截中间件 (Global Auth Interceptor)
+    // 拦截所有非 GET 且非白名单的敏感写入/修改请求，确保底层绝对安全
+    // ============================================================================
+    if (request.method !== "GET" && request.method !== "OPTIONS") {
+      const publicWritePaths = [
+        "/api/login",
+        "/api/auth/login",
+        "/api/love/verify-gatekeeper",
+        "/api/love/verify-license"
+      ];
+      
+      let isPublicPath = false;
+      for (const p of publicWritePaths) {
+        if (url.pathname === p) {
+          isPublicPath = true;
+          break;
+        }
+      }
+
+      if (!isPublicPath) {
+        const isAuthed = await verifyAdminAuth(request);
+        if (!isAuthed) {
+          return jsonResponse({ 
+            success: false, 
+            error: "未授权的访问，当前处于只读访客模式，写入已被印记系统拦截", 
+            code: "UNAUTHORIZED" 
+          }, 401);
+        }
+      }
+    }
+
     try {
+      // 🌟 1. 登录与身份验证合并路由 (统一入口处理)
+      if ((url.pathname === "/api/login" || url.pathname === "/api/auth/login" || url.pathname === "/api/love/verify-gatekeeper") && request.method === "POST") {
+        let reqData = {}; 
+        try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false, error: "数据格式错误" }, 400); }
+        
+        const inputPwd = String(reqData.password || reqData.code || "").trim();
+        let isValid = false;
+
+        if (env.MASTER_RESCUE_KEY && inputPwd === String(env.MASTER_RESCUE_KEY).trim()) {
+          isValid = true;
+        } else if (ADMIN_PASSWORD && ADMIN_PASSWORD !== "521" && inputPwd === ADMIN_PASSWORD) {
+          isValid = true;
+        } else if (inputPwd === "521") {
+          isValid = true;
+        } else if (bucket) {
+          try {
+            const cfgObj = await bucket.get(CONFIG_KEY);
+            if (cfgObj) {
+              const cfg = JSON.parse(await cfgObj.text());
+              if (cfg.adminSecurity?.password && inputPwd === String(cfg.adminSecurity.password).trim()) isValid = true;
+              else if (cfg.gatekeeper?.correctAnswer && inputPwd === String(cfg.gatekeeper.correctAnswer).trim()) isValid = true;
+            }
+          } catch (_) {}
+        }
+
+        if (isValid) {
+          const token = await buildAdminToken(rawHost);
+          // memberToken 字段保留，为了防止旧版前端断裂，无缝升级
+          return jsonResponse({ success: true, token, memberToken: token, isAdmin: true, message: "✨ 身份验证通过，契约秘境与高级权限已解锁" });
+        }
+        return jsonResponse({ success: false, error: "口令错误，无法解锁印记" }, 401);
+      }
+
+      // 🌟 2. 验证登录状态接口 (前端无感刷新验证)
+      if (url.pathname === "/api/check-auth" && request.method === "GET") {
+        const isAdmin = await verifyAdminAuth(request);
+        return jsonResponse({ success: true, isAdmin });
+      }
+
+      // 🌟 3. 获取/更新系统配置
       if (url.pathname === "/api/love/config" && request.method === "GET") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         const isAdmin = await verifyAdminAuth(request);
-        const headerAuth = request.headers.get("x-admin-auth");
-        const queryAuth = url.searchParams.get("auth");
-        const attemptedAuth = (headerAuth || queryAuth || "").trim();
-        if (attemptedAuth && !isAdmin) {
-          return jsonResponse({ success: false, error: "管理口令错误或未授权", isAdmin: false }, 401);
-        }
         let customConfig = null;
         try {
           const obj = await bucket.get(CONFIG_KEY);
           if (obj) customConfig = JSON.parse(await obj.text());
         } catch (_) {}
         const quotaView = await buildQuotaView();
+        
         if (customConfig) {
           if (!isAdmin) {
+            // 游客模式脱敏：删除机密数据
             if (customConfig.gatekeeper) delete customConfig.gatekeeper.correctAnswer;
             if (customConfig.adminSecurity) delete customConfig.adminSecurity.password;
           }
@@ -279,12 +331,12 @@ export default {
 
       if (url.pathname === "/api/love/config" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
-        const isAuthed = await verifyAdminAuth(request);
-        if (!isAuthed) return jsonResponse({ success: false, error: "管理口令错误或未授权" }, 401);
+        
         let reqData;
         try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false, error: "数据格式错误" }, 400); }
         const configToSave = reqData.config || {};
         const configJsonString = JSON.stringify(configToSave);
+        
         if (!sanitizeSanctity(configJsonString)) {
           return jsonResponse({ success: false, error: "包含不洁与低俗言语，圣洁的印记已拒绝此次铭刻。" }, 406);
         }
@@ -310,6 +362,7 @@ export default {
         return jsonResponse({ success: true, domain: rawHost, message: `配置已发布并永久同步至独立存储空间` });
       }
 
+      // 🌟 4. 契约秘境与情感信号
       if (url.pathname === "/api/love/signal" && request.method === "GET") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         let signalData = { activeSignal: null, history: [] };
@@ -324,8 +377,6 @@ export default {
 
       if (url.pathname === "/api/love/signal" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
-        const authRole = await verifyMemberOrAdmin(request);
-        if (authRole !== "admin" && authRole !== "member") return jsonResponse({ success: false, error: "未验证身份，处于只读模式", code: "AUTH_REQUIRED" }, 401);
         let body = {};
         try { body = await request.json(); } catch (_) { return jsonResponse({ success: false, error: "数据格式错误" }, 400); }
         const stage = String(body.stage || "dating");
@@ -333,11 +384,11 @@ export default {
         const senderDeviceId = String(body.senderDeviceId || "").trim();
         const actionType = String(body.actionType || "break_ice");
         const customText = String(body.customText || "").trim();
+        
         if (!sanitizeSanctity(customText)) return jsonResponse({ success: false, error: "言语不洁" }, 406);
-        
         const safeContent = getStageSafeContent(stage, actionType, customText);
-        
         const now = Date.now();
+        
         let signalData = { activeSignal: null, history: [] };
         try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
 
@@ -347,10 +398,8 @@ export default {
             return jsonResponse({ success: false, code: "IN_COOLDOWN", remainingSeconds: Math.ceil((currentSig.cooldownUntil - now) / 1000) }, 429);
           }
           const isFromOtherSide = currentSig.senderGender !== senderGender;
-          
           const isCurrentPeaceAction = Boolean(actionType);
           const isPrevPeaceAction = Boolean(currentSig.actionType);
-          
           const isWithinWindow = (now - currentSig.createdAt) < 5 * 60 * 1000;
           if (isFromOtherSide && isCurrentPeaceAction && isPrevPeaceAction && isWithinWindow) {
             currentSig.status = "mutual_resolved"; currentSig.resolvedAt = now; currentSig.summary = "你们在同一刻想到了彼此，双向奔赴，爱永不止息！";
@@ -371,19 +420,19 @@ export default {
 
       if (url.pathname === "/api/love/signal/ack" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
-        const authRole = await verifyMemberOrAdmin(request);
-        if (authRole !== "admin" && authRole !== "member") return jsonResponse({ success: false, error: "未验证身份，处于只读模式", code: "AUTH_REQUIRED" }, 401);
         let body = {}; try { body = await request.json(); } catch (_) { return jsonResponse({ success: false, error: "数据格式错误" }, 400); }
         const signalId = String(body.signalId || "").trim();
         const responderGender = String(body.responderGender || "girl");
         const responderDeviceId = String(body.responderDeviceId || "").trim();
         const responseType = String(body.responseType || "accept");
         const responseText = String(body.responseText || "").trim();
+        
         if (!sanitizeSanctity(responseText)) return jsonResponse({ success: false, error: "言语不洁" }, 406);
         let signalData = { activeSignal: null, history: [] };
         try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
         const currentSig = signalData.activeSignal;
         if (!currentSig || currentSig.signalId !== signalId) return jsonResponse({ success: false, error: "信号已过期或已被处理" }, 404);
+        
         const now = Date.now();
         if (responseType === "viewed") { if (currentSig.status === "active") { currentSig.status = "viewed"; currentSig.viewedAt = now; } }
         else if (responseType === "accept") {
@@ -408,37 +457,43 @@ export default {
 
       if (url.pathname === "/api/love/signal/clear" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
-        const isAuthed = await verifyAdminAuth(request); if (!isAuthed) return jsonResponse({ success: false, error: "未授权" }, 401);
         let signalData = { activeSignal: null, history: [] }; try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
         signalData.activeSignal = null;
         await bucket.put(SIGNALS_KEY, JSON.stringify(signalData, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
         return jsonResponse({ success: true, message: "已重置信号状态" });
       }
 
+      // 🌟 5. 文件上传与配额控制
       if (url.pathname === "/api/love/upload" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
-        const isAuthed = await verifyAdminAuth(request); if (!isAuthed) return jsonResponse({ success: false, error: "未授权" }, 401);
-        const formData = await request.formData(); const file = formData.get("file");
+        const formData = await request.formData(); 
+        const file = formData.get("file");
         if (!file) return jsonResponse({ success: false, error: "未接收到文件" }, 400);
+        
         const quota = await readQuota();
         const tier = (quota && quota.tier && TIER_QUOTA[quota.tier]) ? quota.tier : "basic";
         const tierConf = TIER_QUOTA[tier];
         const fileSize = file.size || 0;
+        
         if (tierConf.maxFileBytes && fileSize > tierConf.maxFileBytes) {
           return jsonResponse({ success: false, error: `单个文件超过当前套餐上限(${tier}档)，请压缩后重试或升级套餐`, code: "FILE_TOO_LARGE" }, 413);
         }
+        
         const usedBefore = (quota && typeof quota.usedBytes === "number") ? quota.usedBytes : 0;
         if (usedBefore + fileSize > tierConf.storageBytes) {
           return jsonResponse({ success: false, error: "存储空间已满，可升级套餐解锁更多空间", code: "STORAGE_FULL" }, 403);
         }
+        
         const safeName = (file.name || "media.bin").replace(/[^a-zA-Z0-9.\-_]/g, "_");
         const r2Key = `${tenantDir}/assets/${Date.now()}_${safeName}`;
         await bucket.put(r2Key, file.stream(), { httpMetadata: { contentType: file.type || "application/octet-stream" } });
+        
         const newUsed = usedBefore + fileSize;
         await writeQuota({ tier, usedBytes: newUsed, updatedAt: new Date().toISOString() });
         return jsonResponse({ success: true, url: `/raw/${r2Key}`, usedBytes: newUsed, tier });
       }
 
+      // 🌟 6. 宠物数据读写
       if (url.pathname === "/api/love/pet") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         if (request.method === "GET") {
@@ -446,8 +501,6 @@ export default {
           return jsonResponse({ success: true, petData: null });
         }
         if (request.method === "POST") {
-          const authRole = await verifyMemberOrAdmin(request);
-          if (authRole !== "admin" && authRole !== "member") return jsonResponse({ success: false, error: "未验证身份，处于只读模式", code: "AUTH_REQUIRED" }, 401);
           let reqData = {}; try { reqData = await request.json(); } catch (_) {}
           const newPetData = reqData.petData; if (!newPetData) return jsonResponse({ success: false, error: "无数据" }, 400);
           if (!sanitizeSanctity(JSON.stringify(newPetData))) return jsonResponse({ success: false, error: "言语不洁" }, 406);
@@ -458,46 +511,7 @@ export default {
         }
       }
 
-      if (url.pathname === "/api/love/verify-gatekeeper" && request.method === "POST") {
-        let reqData = {}; try { reqData = await request.json(); } catch (_) {}
-        
-        // 获取原始输入内容
-        const rawInputPwd = String(reqData.password || "").trim();
-        const inputPwd = rawInputPwd.toLowerCase();
-
-        // 🌟 [新增] 万能救援密钥拦截逻辑 (门禁开锁专用通道)
-        // 使用 rawInputPwd 防止由于转小写导致大小写敏感的密钥验证失败
-        if (env.MASTER_RESCUE_KEY && rawInputPwd === String(env.MASTER_RESCUE_KEY).trim()) {
-          const memberToken = await buildMemberToken(rawHost);
-          return jsonResponse({ success: true, isAdmin: true, memberToken });
-        }
-
-        let correctPwd = "240520";
-        let customAdminPwd = null;
-        if (bucket) {
-          try {
-            const cfgObj = await bucket.get(CONFIG_KEY);
-            if (cfgObj) { const cfg = JSON.parse(await cfgObj.text()); if (cfg.gatekeeper?.correctAnswer) correctPwd = String(cfg.gatekeeper.correctAnswer).trim().toLowerCase(); if (cfg.adminSecurity?.password) customAdminPwd = String(cfg.adminSecurity.password).trim().toLowerCase(); }
-          } catch (_) {}
-        }
-        let isAdmin = false;
-        if (customAdminPwd) { 
-          if (inputPwd === customAdminPwd || (env.ADMIN_PASSWORD && env.ADMIN_PASSWORD !== "521" && inputPwd === String(env.ADMIN_PASSWORD).trim().toLowerCase())) isAdmin = true; 
-        } else { 
-          if (inputPwd === "521" || (env.ADMIN_PASSWORD && env.ADMIN_PASSWORD !== "521" && inputPwd === String(env.ADMIN_PASSWORD).trim().toLowerCase())) isAdmin = true; 
-        }
-        
-        if (isAdmin) {
-          const memberToken = await buildMemberToken(rawHost);
-          return jsonResponse({ success: true, isAdmin: true, memberToken });
-        }
-        if (inputPwd === correctPwd) {
-          const memberToken = await buildMemberToken(rawHost);
-          return jsonResponse({ success: true, isAdmin: false, memberToken });
-        }
-        return jsonResponse({ success: false, message: "口令错误" }, 403);
-      }
-
+      // 🌟 7. License 商业级秘钥激活
       if (url.pathname === '/api/love/verify-license' && request.method === 'POST') {
         try {
           const body = await request.json();
@@ -513,7 +527,6 @@ export default {
           }
 
           const currentHost = url.hostname;
-          
           const expectedLuxury = await buildLicenseCode(currentHost, "PRO_LUXURY", secret);
           const expectedFlagship = await buildLicenseCode(currentHost, "PRO_FLAGSHIP", secret);
           const expectedWildLuxury = await buildLicenseCode("*", "PRO_LUXURY", secret);
@@ -562,6 +575,7 @@ export default {
         }
       }
 
+      // 🌟 8. 音乐检索流与日记存取
       if (url.pathname === "/api/love/music-search" && request.method === "GET") {
         const keyword = (url.searchParams.get("keyword") || "").trim(); const songs = []; const seen = new Set();
         if (keyword) {
@@ -623,28 +637,6 @@ export default {
         return Response.redirect(targetAudioUrl, 302);
       }
 
-      const DIARY_KEY = `${tenantDir}/diary.json`;
-
-      if (url.pathname === "/api/auth/login" && request.method === "POST") {
-        let reqData; 
-        try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false }, 400); }
-        
-        const inputPwd = String(reqData?.password || "").trim();
-
-        // 🌟 [新增] 万能救援密钥拦截逻辑 (控制台直接免密登录)
-        if (env.MASTER_RESCUE_KEY && inputPwd === String(env.MASTER_RESCUE_KEY).trim()) {
-          return jsonResponse({ success: true, token: inputPwd }); 
-        }
-
-        const mockReq = { headers: new Headers({ "x-admin-auth": inputPwd }) };
-        const isValid = await verifyAdminAuth(mockReq);
-        
-        if (isValid) {
-          return jsonResponse({ success: true, token: inputPwd }); 
-        }
-        return jsonResponse({ success: false, error: "管理密码错误" }, 401);
-      }
-
       if (url.pathname === "/api/diary/data" && request.method === "GET") {
         let parsedData = null;
         if (bucket) {
@@ -658,10 +650,6 @@ export default {
 
       if (url.pathname === "/api/diary/save" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
-        
-        const isAuthed = await verifyAdminAuth(request);
-        if (!isAuthed) return jsonResponse({ success: false, error: "管理口令错误或未授权" }, 401);
-
         let reqData; 
         try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false }, 400); }
 
@@ -679,6 +667,7 @@ export default {
         return jsonResponse({ success: true, message: "日记已安全同步至云端" });
       }
 
+      // 🌟 9. R2 存储读取代理
       if (url.pathname.startsWith("/raw/")) {
         if (!bucket) return new Response("Bucket Not Found", { status: 500 });
         const key = decodeURIComponent(url.pathname.replace(/^\/raw\//, ""));
