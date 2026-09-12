@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>印记 · 用户使用手册</title>
+  <!-- 🌟 核心植入：心形 Emoji 网页图标 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
+  
+  <style>
+    :root {
+      /* 太阳金渐变色系与暗黑底色融合，保证阅读清晰度 */
+      --bg-dark: #0f0702;
+      --card-bg: rgba(26, 12, 5, 0.85);
+      --card-border: rgba(245, 158, 11, 0.25);
+      --gold: #f59e0b;
+      --gold-glow: rgba(245, 158, 11, 0.5);
+      --text-main: #f8fafc;
+      --text-sub: #cbd5e1;
+      --accent-cyan: #38bdf8;
+      --accent-pink: #f43f5e;
+      --warning-red: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; } /* 平滑滚动 */
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.8;
+      /* 极致太阳金渐变背景 */
+      background-image: 
+        radial-gradient(circle at 15% 0%, rgba(245, 158, 11, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 100%, rgba(217, 119, 6, 0.15) 0%, transparent 40%),
+        linear-gradient(135deg, #0f0702 0%, #1e1104 50%, #0f0702 100%);
+      background-attachment: fixed;
+      overflow-x: hidden; /* 绝对防止横向溢出 */
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      /* 🌟 核心修复：引入顶部和底部安全区，防止标题和内容被刘海或底部横条遮挡 */
+      padding: calc(40px + env(safe-area-inset-top)) 20px calc(100px + env(safe-area-inset-bottom)) 20px;
+    }
+
+    /* 顶部头部 */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .main-title {
+      font-size: 34px;
+      font-weight: 900;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #fde68a 0%, #f59e0b 50%, #d97706 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 2px;
+      text-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+    }
+
+    .sub-title { color: #fde68a; font-size: 15px; font-weight: bold; }
+
+    /* 切换 Tabs 控制 */
+    .tabs-wrapper {
+      position: sticky;
+      /* 🌟 核心修复：悬浮导航栏同样引入刘海高度补偿，滑动时绝不会卡进刘海里 */
+      top: calc(15px + env(safe-area-inset-top));
+      z-index: 100;
+      margin-bottom: 30px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      background: rgba(15, 7, 2, 0.75);
+      padding: 8px;
+      border-radius: 99px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .tab-btn {
+      flex: 1;
+      max-width: 260px;
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      padding: 14px 20px;
+      border-radius: 99px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px var(--gold-glow);
+    }
+
+    /* 内容区域切换 */
+    .manual-content {
+      display: none;
+      animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .manual-content.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 顶部直达按钮栏 */
+    .direct-action-bar {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .direct-btn {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid var(--gold);
+      color: #fde68a;
+      text-decoration: none;
+      padding: 12px 28px;
+      border-radius: 99px;
+      font-size: 15px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+    }
+    .direct-btn:hover {
+      background: var(--gold);
+      color: #fff;
+      box-shadow: 0 0 25px var(--gold-glow);
+      transform: translateY(-2px);
+    }
+
+    /* 快速电梯导航 (TOC) */
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 35px;
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px dashed var(--gold);
+    }
+    .toc-title {
+      grid-column: 1 / -1;
+      font-size: 14px;
+      color: var(--gold);
+      margin-bottom: 5px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .toc-link {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-sub);
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .toc-link:hover {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fff;
+      border-color: var(--gold);
+    }
+
+    /* 核心理念卡片 */
+    .core-philosophy-card {
+      background: linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(15, 7, 2, 0.9) 100%);
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    .core-philosophy-card h2 { color: var(--gold); font-size: 22px; margin-bottom: 15px; text-align: center; }
+    .philosophy-intro { text-align: center; color: #fde68a; font-size: 15px; margin-bottom: 25px; font-weight: bold; }
+    
+    .philosophy-item { margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 16px 20px; border-radius: 12px; border-left: 3px solid var(--accent-pink); }
+    .philosophy-item:nth-child(3) { border-left-color: var(--accent-cyan); }
+    .philosophy-item:nth-child(4) { border-left-color: #fde68a; }
+    
+    .philosophy-item h4 { color: #fff; font-size: 16.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .philosophy-item p { color: #cbd5e1; font-size: 14.5px; line-height: 1.7; }
+    
+    .philosophy-summary {
+      margin-top: 25px; padding: 16px; background: rgba(245, 158, 11, 0.15);
+      border-radius: 12px; color: #fff; font-size: 14.5px; line-height: 1.7; border: 1px dashed var(--gold);
+    }
+
+    /* 常规卡片段落 */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 26px 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transition: transform 0.3s ease;
+      /* 🌟 核心修复：锚点定位偏移量同样加入刘海计算，防止点击目录后跳转时卡片被上方导航条压住 */
+      scroll-margin-top: calc(130px + env(safe-area-inset-top)); 
+    }
+    .section-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+
+    .section-title {
+      font-size: 19px;
+      color: var(--gold);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .content-list { list-style: none; }
+    .content-list li { margin-bottom: 14px; position: relative; padding-left: 22px; font-size: 15px; color: #e2e8f0; }
+    .content-list li::before { content: "•"; position: absolute; left: 0; color: var(--gold); font-weight: bold; font-size: 18px; line-height: 1.4; }
+
+    /* 高亮与强调规范 */
+    .highlight { color: var(--gold); font-weight: bold; }
+    .highlight-red { color: var(--warning-red); font-weight: bold; }
+    
+    .tip-box {
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 4px solid var(--accent-cyan);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin-top: 15px;
+      font-size: 14.5px;
+      color: #e0f2fe;
+    }
+    .warning-box {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--warning-red);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin-top: 15px;
+      font-size: 14.5px;
+      color: #fecaca;
+    }
+
+    /* 极致美化表格 */
+    .tier-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 12px;
+      border: 1px solid var(--gold);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      -webkit-overflow-scrolling: touch;
+    }
+    .tier-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      min-width: 800px; /* 保证表格在手机端也能划动看清全貌 */
+      background: rgba(0,0,0,0.4);
+    }
+    .tier-table th, .tier-table td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-right: 1px solid rgba(255,255,255,0.05);
+      line-height: 1.6;
+      vertical-align: top;
+    }
+    .tier-table th {
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.2) 0%, rgba(0,0,0,0.8) 100%);
+      color: var(--gold);
+      font-weight: 900;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+    .tier-table td:first-child { font-weight: bold; color: #fff; background: rgba(255,255,255,0.02); }
+    .tier-table tr:last-child td { border-bottom: none; }
+    .tier-table tbody tr:hover { background: rgba(245, 158, 11, 0.05); }
+
+    .badge-basic { color: #94a3b8; font-weight: bold; }
+    .badge-luxury { color: #38bdf8; font-weight: bold; }
+    .badge-flagship { color: #fde68a; font-weight: bold; text-shadow: 0 0 10px rgba(245,158,11,0.5); }
+
+    .faq-item { margin-bottom: 24px; }
+    .faq-q { color: var(--gold); font-weight: 900; font-size: 16px; margin-bottom: 8px; }
+    .faq-a { color: #cbd5e1; font-size: 14.5px; padding-left: 14px; border-left: 2px solid rgba(245, 158, 11, 0.3); line-height: 1.7; }
+
+    /* 移动端专属自适应逻辑 */
+    @media (max-width: 768px) {
+      .container { 
+        /* 手机端更加精确的刘海安全区下推 */
+        padding: calc(30px + env(safe-area-inset-top)) 15px calc(60px + env(safe-area-inset-bottom)) 15px; 
+      }
+      .tabs-wrapper {
+        /* 手机端悬浮导航栏刘海安全区下推 */
+        top: calc(10px + env(safe-area-inset-top));
+      }
+      .tabs { 
+        flex-direction: column; 
+        border-radius: 16px; 
+      }
+      .tab-btn { 
+        max-width: 100%; 
+        border-radius: 12px; 
+        padding: 14px 12px; /* 保证按钮厚度对称饱满 */
+        justify-content: center; /* 确保文字与图标严格居中对称 */
+      }
+      .section-card { padding: 20px 15px; }
+      .core-philosophy-card { padding: 25px 20px; }
+      .toc-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1 class="main-title">❤️ 印记 · 用户使用手册</h1>
+      <p class="sub-title">本手册帮助您完全掌握私密时空的配置与交互密码。</p>
+    </div>
+
+    <div class="core-philosophy-card">
+      <h2>★ 核心理念：这个网站真正想传达的</h2>
+      <p class="philosophy-intro">这个网站不只是用来「记录」的，而是用来经营一份爱的。它把你们的故事藏进一个个小功能里，让每一份心意都能被看见、被回应。它的内核，是下面这三句话：</p>
+      
+      <div class="philosophy-item">
+        <h4>🌊 爱情胜过死亡</h4>
+        <p>真正的爱，比任何外在的束缚都更坚定、更长久。它禁得起时间的考验，禁得起平淡日子的打磨。</p>
+      </div>
+      <div class="philosophy-item">
+        <h4>💧 众水不能熄灭，大水不能淹没</h4>
+        <p>再大的风浪、再远的距离、再多的琐碎，都冲刷不掉你们之间的那点笃定与珍惜。这里是你们可以放心依靠的「港湾」。</p>
+      </div>
+      <div class="philosophy-item">
+        <h4>💗 爱情不是讲理的地方</h4>
+        <p>这里不争对错、不比输赢，而是理解、包容、接纳、舍己、付出、爱。允许彼此不完美，但永远选择靠近与成全。</p>
+      </div>
+      
+      <div class="philosophy-summary">
+        <strong>❓ 你该怎么用这份「核心理念」？</strong><br>
+        它提醒你：布置这个网站时，多放真心话、少放客套话；多用它制造惊喜与仪式感，而不是把它当成任务。每一张照片、每一句话，都应该是你们真实故事的写照。
+      </div>
+    </div>
+
+    <div class="tabs-wrapper">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('backend')">⚙️ 控制台使用手册</button>
+        <button class="tab-btn" onclick="switchTab('frontend')">🌌 前台主页使用手册</button>
+      </div>
+    </div>
+
+    <div id="backend-manual" class="manual-content active">
+      
+      <div class="direct-action-bar">
+        <a href="../admin.html" class="direct-btn">➔ 一键直达：印记 · 控制台设置界面</a>
+      </div>
+
+      <div class="toc-grid">
+        <div class="toc-title">⚡ 快速跳转指引</div>
+        <a href="#admin-1" class="toc-link">1. 基础档案与周期</a>
+        <a href="#admin-2" class="toc-link">2. 门禁与专属语音</a>
+        <a href="#admin-3" class="toc-link">3. 打字机告白信件</a>
+        <a href="#admin-4" class="toc-link">4. 时光轨迹与头像</a>
+        <a href="#admin-5" class="toc-link">5. 倒数日与纪念日</a>
+        <a href="#admin-6" class="toc-link">6. 破冰与和解信号</a>
+        <a href="#admin-7" class="toc-link">7. 同行心愿清单</a>
+        <a href="#admin-8" class="toc-link">8. 舍己包容刮刮乐</a>
+        <a href="#admin-9" class="toc-link">9. 音乐与播放列表</a>
+        <a href="#admin-10" class="toc-link">10. 隐藏角落彩蛋</a>
+        <a href="#admin-11" class="toc-link">11. 双视角主题陈列</a>
+        <a href="#admin-12" class="toc-link">12. 专属授权码激活</a>
+        <a href="#admin-13" class="toc-link">13. 生日盲盒3D贺卡</a>
+      </div>
+
+      <p style="text-align:center; color:var(--text-sub); margin-bottom: 25px;">
+        本手册将引导您全面了解并配置您的专属私密时空。您在右侧编辑的所有内容，点击右上角的<span class="highlight">“💾 立即发布生效”</span>后，将实时同步至您的专属前端网址。
+      </p>
+
+      <div id="admin-1" class="section-card">
+        <h3 class="section-title">👫 1. 基础档案与关系周期</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">此模块用于构建你们专属时空的基础信息与关系周期边界。</p>
+        <ul class="content-list">
+          <li><span class="highlight">安全管理：</span>修改全站唯一的后台管理密码（首次使用请务必修改默认密码。日记登录、主页功能中枢解除封印、控制台登录这三处，共用此密码）。</li>
+          <li><span class="highlight">关系周期设置：</span>系统具有严格的边界机制。请根据你们当前的真实状态选择恋爱期、订婚期或结婚期。该设置将直接影响系统中的亲密选项和破冰和解文案的解锁与展示，恪守感情伦理边界。</li>
+          <li><span class="highlight">基础信息：</span>设定男女双方姓名/昵称、恋爱同行起始时间，以及自定义网页全局的主标题与副标题。</li>
+        </ul>
+      </div>
+
+      <div id="admin-2" class="section-card">
+        <h3 class="section-title">🔒 2. 数字门禁与专属语音</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">为您的私密时空设置安全且充满温情的访客拦截屏障，开启门禁时访客无密码无法访问，关闭门禁时访客可以访问（请放心：访客能访问但不能胡乱修改你们的设置内容）。</p>
+        <ul class="content-list">
+          <li><span class="highlight">数字密码：</span>设定一个具有纪念意义的 6 位数字口令（如相识纪念日、结婚纪念日）。</li>
+          <li><span class="highlight">专属语音解锁（PRO 特权）：</span>输入您专属的誓言词汇（如“永远爱你”）。点击麦克风 🎙️，必须要允许设备使用语音，然后说出誓言词汇直接解锁进入。</li>
+          <li><span class="highlight">温情防呆提示：</span>自定义密码输入错误时的提示语，让防线依然保持包容与温度。</li>
+        </ul>
+      </div>
+
+      <div id="admin-3" class="section-card">
+        <h3 class="section-title">💌 3. 打字机真情告白信件</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">设置展示在主页核心区域的告白信。</p>
+        <ul class="content-list">
+          <li>支持自定义情书标题、落款签名、内容与日期。</li>
+          <li>在正文内容中，文字将以复古打字机的逐字敲击特效在前端呈现，适合写下对感情最深沉的承诺。</li>
+        </ul>
+      </div>
+
+      <div id="admin-4" class="section-card">
+        <h3 class="section-title">🪐 4. 时光轨迹照片与头像</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">记录感情路上的重要节点，生成专属的拍立得照片墙与时光轴。</p>
+        <ul class="content-list">
+          <li><span class="highlight-red">重要提示：</span>此模块中<span class="highlight">节点 #1 的正面照片</span>将被系统自动抓取，作为网页左上角的专属情侣头像固定展示。其他的照片将以照片墙的形式随机呈现在主页。</li>
+          <li><span class="highlight">节点编辑：</span>您可以为每个瞬间设定日期、地点、照片、故事标题及正面描述。</li>
+          <li><span class="highlight">背面隐藏互动：</span>支持为每张照片添加“背面留言”，并上传/录制专属语音。前端用户点击照片翻转后方可查看和收听。</li>
+        </ul>
+      </div>
+
+      <div id="admin-5" class="section-card">
+        <h3 class="section-title">📅 5. 倒数日与纪念日管理</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">智能管理所有重要日子，支持公历与农历的精准换算。</p>
+        <ul class="content-list">
+          <li><span class="highlight">三大度量模式：</span>
+            <ul style="list-style:circle; padding-left: 20px; margin-top: 5px;">
+              <li><span class="highlight-cyan">🔁 每年重复倒数：</span>适用于生日、订婚、结婚纪念日等。</li>
+              <li><span class="highlight-cyan">⏳ 累积同行天数：</span>适用于记录相恋至今的累计时间。</li>
+              <li><span class="highlight-cyan">🎯 未来单次目标：</span>适用于筹备中的求婚、旅行规划。</li>
+            </ul>
+          </li>
+          <li><span class="highlight">首页主打：</span>可将最重要的一个纪念日设为“首页主打倒数”，它将在前端拥有最显眼的展示位。</li>
+        </ul>
+      </div>
+
+      <div id="admin-6" class="section-card">
+        <h3 class="section-title">🕊️ 6. 三时期破冰和解信号</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">专为感情摩擦设计的“台阶”与情绪缓冲系统。</p>
+        <ul class="content-list">
+          <li><span class="highlight">冷静期锁定：</span>可设定 5-60 分钟的情绪冷静期倒计时，防止在争吵高潮时频繁发送信号施压。</li>
+          <li><span class="highlight">三阶段文案管理：</span>内置 28 条深度共情的和解文案，严格区分恋爱、订婚、结婚阶段。支持自定义修改选项标签与详细台阶文案。</li>
+          <li><span class="highlight">双向奔赴机制：</span>若双方在一定时间窗口内同时发送和解信号，系统将触发“双向奔赴”特殊动画及记录。</li>
+        </ul>
+      </div>
+
+      <div id="admin-7" class="section-card">
+        <h3 class="section-title">📝 7. 同行心愿与待办清单</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">规划你们未来的浪漫蓝图。</p>
+        <ul class="content-list">
+          <li>主页默认同行待办清单有恋爱期、订婚期、结婚期、孕期四个阶段，并且默认给出每个时期很丰富的待办事项。</li>
+          <li>主要以核心理念去练习舍己、包容、理解、接纳……这些默认清单可以修改，<span class="highlight">但鼓励你认真想想是否要试一试？让爱更真实？</span></li>
+          <li>将想一起去做的事情记录下来，并归类到对应的感情阶段。完成即可勾选状态，沉淀为感情的见证。</li>
+        </ul>
+      </div>
+
+      <div id="admin-8" class="section-card">
+        <h3 class="section-title">🎟️ 8. 为对方舍己的刮刮乐</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">一个充满惊喜与包容的互动玩法。</p>
+        <ul class="content-list">
+          <li>自定义刮刮乐的图标、特权名称及具体说明（例如：“无条件兑现一次心愿”、“免除一次家务”）。<span class="highlight-red">（注：自定义时不可以提不合理要求。）</span></li>
+          <li>对方在前端通过涂层刮除操作获取特权，后台将自动记录核销状态。</li>
+        </ul>
+      </div>
+
+      <div id="admin-9" class="section-card">
+        <h3 class="section-title">🎵 9. 背景音乐与播放列表</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">打造沉浸式的听觉体验，最高支持 50 首曲目。</p>
+        <ul class="content-list">
+          <li><span class="highlight">在线搜索（0 存储占用）：</span>直接输入歌名或歌手，一键检索全网高保真音频并加入歌单，此方式完全不消耗您的套餐存储空间。（注：有些歌曲因版权问题无法设置，请选择能试听的，能试听的就可以加入歌单）。</li>
+          <li><span class="highlight">本地直传：</span>支持上传本地 MP3 原版音频（受套餐单文件大小限制约束，PRO版本会更合适）。</li>
+          <li><span class="highlight">播放设置：</span>支持设置默认首播主打歌、全局播放模式（单曲/列表/随机），以及上传专属的黑胶唱片旋转封面。</li>
+        </ul>
+      </div>
+
+      <div id="admin-10" class="section-card">
+        <h3 class="section-title">🐣 10. 隐藏角落彩蛋悄悄话</h3>
+        <ul class="content-list">
+          <li>在网页的特定角落（星星、猫爪图标）埋下隐藏的惊喜。</li>
+          <li>自定义点击这些隐藏图标后弹出的“暗号”或“悄悄话”文本。前端触发时会伴随特效展示，增加探索乐趣。</li>
+        </ul>
+      </div>
+
+      <div id="admin-11" class="section-card">
+        <h3 class="section-title">🎨 11. 男女双视角主题设置</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">为男女双方提供两套截然不同的视觉审美与交互主题。</p>
+        <ul class="content-list">
+          <li><span class="highlight">双视角独立选型：</span>分别指定男生访问时的深色星河主题，与女生访问时的浅色花汐主题。</li>
+          <li><span class="highlight">PRO 高定解锁：</span>基础免费版仅支持默认主题；激活 PRO 套餐后，将全量（12个主题，男生6个/女生6个）解锁带有毛玻璃、镭射反光等质感的高奢主题陈列室。</li>
+          <li><span class="highlight">自定义壁纸：</span>支持为不同视角单独上传静态图或动态 GIF/WEBP 作为全局背景。<span class="highlight-cyan">（注意：手机端上传竖屏照片，电脑端上传横屏照片，效果最佳）</span></li>
+        </ul>
+      </div>
+
+      <div id="admin-12" class="section-card">
+        <h3 class="section-title">💎 12. 专属授权码激活状态</h3>
+        <ul class="content-list">
+          <li>管理您的系统配额与高级权限。</li>
+          <li>在此输入您获取的 <code>LV-XXXX-XXXX-XXXX-XXXX</code> 格式的 16 位专属激活码。</li>
+          <li>验证通过后，系统将自动点亮您的 <span class="highlight">👑 PRO 徽章</span>，解除基础版锁定，并实时更新当前套餐使用量百分比进度条。</li>
+        </ul>
+      </div>
+
+      <div id="admin-13" class="section-card">
+        <h3 class="section-title">🎂 13. 生日盲盒 3D 全息贺卡</h3>
+        <p style="margin-bottom:10px; color:#94a3b8;">制造极具期待感的定时惊喜礼物。</p>
+        <ul class="content-list">
+          <li><span class="highlight">锁定倒数：</span>设定一个未来的解锁日期（如对方的生日）。在日期到达前，前端将呈现锁定倒数状态。为了让你知道惊喜礼物确认准备好了，<span class="highlight-cyan">在对方的主题视角下，可以看到锁定的内容倒数</span>。</li>
+          <li><span class="highlight">高定 3D 模版：</span>内置 4 款针对男女审美设计的高端 3D 互动模版（如深空机甲、法式初雪）。</li>
+          <li><span class="highlight">全息封装：</span>支持上传贺卡中心照片、录制一段专属语音，并附上长篇祝福语，时间一到将伴随特效惊艳展现。</li>
+        </ul>
+      </div>
+
+      <div class="tip-box">
+        💡 <strong>使用建议：</strong>每次完成关键信息的编辑或上传媒体文件后，请务必点击右上角的<span class="highlight">“💾 立即发布生效”</span>按钮，确保所有心血稳妥保存在独立云端，并在主页完美展现。
+      </div>
+    </div>
+    
+    <p style="text-align: center; color: var(--accent-pink); font-size: 18px; font-weight: bold; margin-top: 40px; text-shadow: 0 0 15px rgba(244, 63, 94, 0.4);">
+        ✨ 印记 · 祝你们幸福长久 💕
+    </p>
+
+    <!-- ==========================================
+         第二部分：前台主页手册 (Frontend Manual)
+         ========================================== -->
+    <div id="frontend-manual" class="manual-content">
+      
+      <div class="direct-action-bar">
+        <a href="../index.html" class="direct-btn">➔ 一键直达：印记 · 沉浸式主页时空</a>
+      </div>
+
+      <div class="toc-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+        <div class="toc-title">⚡ 快速跳转指引</div>
+        <a href="#front-1" class="toc-link">一、 三大隐藏解锁入口</a>
+        <a href="#front-2" class="toc-link">二、 首页视觉与轻互动</a>
+        <a href="#front-3" class="toc-link">三、 九宫格应用集群</a>
+        <a href="#front-4" class="toc-link">四、 核心注意事项</a>
+        <a href="#front-5" class="toc-link">五、 常见问题 (FAQ)</a>
+        <a href="#front-6" class="toc-link">六、 套餐特权详尽对比</a>
+      </div>
+
+      <p style="text-align:center; color:var(--text-sub); margin-bottom: 25px;">
+        本手册将带您全面探索“雅歌时空”前端展示页的各项功能与隐藏彩蛋。只需阅读本指南，您即可轻松掌握全站的交互密码。
+      </p>
+
+      <div id="front-1" class="section-card">
+        <h3 class="section-title">一、 🤫 绝对机密：四大隐藏解锁入口</h3>
+        <p style="margin-bottom: 15px; color: #94a3b8;">为了保证时空的私密性与极简美学，系统将最核心的管理入口进行了“无痕隐藏”。</p>
+        <ul class="content-list">
+          <li><span class="highlight">1. 初始门禁封印解锁</span><br>
+            <strong>操作方式：</strong>当您首次打开网页，看到滚动代码和“溪边之树”的封印遮罩时，<span class="highlight-cyan">直接点击屏幕任意地方</span>。<br>
+            <strong>效果：</strong>系统将唤起“恒久契约”密码输入框或语音识别弹窗，验证成功后方可降下封印，进入 3D 沉浸式主站。
+          </li>
+          <li style="margin-top: 15px;"><span class="highlight">2. 控制台（后台管理）隐藏入口</span><br>
+            <strong>操作方式：</strong>在进入主站后，<span class="highlight-cyan">直接点击页面正上方居中的男女主角姓名</span>（如“张小阳 & 李小光”的文字区域）。<br>
+            <strong>效果：</strong>页面会弹出暗黑色的“雅歌时空控制台”窗口。输入您在后台设置的独立管理密码（默认初始密码为 521），即可瞬间跃迁至“印记 · 控制台”进行数据编辑。
+          </li>
+          <li style="margin-top: 15px;"><span class="highlight">3. 持印者设备升级 隐藏激活入口</span><br>
+            <strong>操作方式：</strong>双击（点两下“星轨功能中枢 · 契约秘境”），<span class="highlight-cyan">连续点两下这段文字</span>。<br>
+            <strong>效果：</strong>页面弹出持印者设备升级，输入控制台密码即可用一次永久开启本设备（你使用的手机或电脑）查看书写、修改契约秘境和灵宠鸽子里的任意功能。<span class="highlight-red">（若没有验证，一律按照游客设备对待，游客设备只有只读权限，无法修改和查看里面的内容。）</span>
+          </li>
+          <li style="margin-top: 15px;"><span class="highlight">4. 专属授权码（CD-Key）隐藏激活入口</span><br>
+            <strong>操作方式：</strong>滑动到网页的最底端，找到那行极小的版权文字（“✨ 爱情坚强如死，众水不能熄灭 · 雅歌之印 ✨”），用手指<span class="highlight-cyan">长按该段文字 2.5 秒以上</span>（电脑端为鼠标长按不松开）。<br>
+            <strong>效果：</strong>系统将触发震动并弹出“跃迁引擎已激活”的隐藏输入框，在此输入您购买的 LV- 开头的 16 位 PRO 专属授权码，即可永久解锁高级权限与全量存储空间。
+          </li>
+        </ul>
+      </div>
+
+      <div id="front-2" class="section-card">
+        <h3 class="section-title">二、 🌌 首页视觉与轻互动模块</h3>
+        <ul class="content-list">
+          <li><span class="highlight">男女双视角无缝切换：</span>点击右上角的“🪐 他的星河”或“🌸 她的花汐”按钮，整个宇宙的色调、背景和粒子特效将瞬间切换，为您呈现两种截然不同的浪漫心境。</li>
+          <li><span class="highlight">生命倒数与时光轴：</span>正中央的“同行守护计时器”会精准跳动到秒，记录你们相恋的总时长。下方则是复古打字机风格的“真情告白信”，文字会逐字敲击显现。</li>
+          <li><span class="highlight">角落寻宝（隐藏彩蛋）：</span>注意画面四周角落（如右上角的“星星 ⭐”或右下角的“猫爪印 🐾”）。点击它们，会随机掉落满屏特效并弹出你们设定的“悄悄话”暗号。</li>
+          <li><span class="highlight">灵宠鸽子：</span>点击鸽子进入，可以记录每日感恩事件和为对方舍己的记录。感恩和舍己之后增加光芒值，光芒值可提升灵宠鸽子等级、图标、称号等。</li>
+          <li><span class="highlight">左下角心跳播控：</span>左下角跳动的红色爱心是全局背景音乐（BGM）的隐藏控制台，点击可暂停/播放专属音乐流。<span class="highlight-cyan">（长按❤️会出现播放列表）</span></li>
+        </ul>
+      </div>
+
+      <div id="front-3" class="section-card">
+        <h3 class="section-title">三、 🕹️ 星轨功能中枢 · 契约秘境 (九宫格)</h3>
+        <p style="margin-bottom: 15px; color: #94a3b8;">向下滑动页面，即可进入核心应用集群区，包含九大独立功能模块：</p>
+        <ul class="content-list">
+          <li><span class="highlight">🪐 时光轨迹：</span>3D 拍立得照片墙：翻转照片后，可以查看背后的专属密语甚至播放隐藏的语音留言。<span class="highlight-cyan">（点击3D心型照片引擎按钮，即可以3D心型的动态形式展现你们所有的照片。）</span></li>
+          <li><span class="highlight">📅 时光刻度：</span>恒久纪念日历。直观展示下一次生日、纪念日的倒数天数，以及过去重要目标的累计天数。</li>
+          <li><span class="highlight">🕊️ 破冰和解：</span>情感信号箱与避风港。吵架冷战时的破冰神器，内置三阶段的“台阶文案”，支持双向奔赴验证。</li>
+          <li><span class="highlight">📝 同行清单：</span>情侣必做的 100 件事项/心愿单。分阶段记录待办事项，完成即可打卡点击。</li>
+          <li><span class="highlight">📒 我们的日记：</span>记录酸甜苦辣的专属私密日记本，支持分类与文本（同时支持录音、照片）记录。</li>
+          <li><span class="highlight">🏅 圣约印记：</span>成就徽章系统。根据你们同行的时长和互动的频率，自动解锁高级荣誉称号。</li>
+          <li><span class="highlight">🎟️ 舍己特权：</span>电子刮刮乐。用手指在屏幕上真实刮开涂层，获取对方设定的“包容特权券”（如免做家务一次），系统会自动记录核销。</li>
+          <li><span class="highlight">📸 数字永存：</span>一键生成 300DPI 的超清数据海报。包含你们的同行天数、经典誓言和专属二维码，可下载保存或发朋友圈。</li>
+          <li><span class="highlight">🎂 生日盲盒：</span>3D 时空贺卡。在设定的日期到达之前，盲盒处于倒数上锁状态；时间一到，点击即可展开炫酷的 3D 全息视觉特效与专属语音祝福。</li>
+        </ul>
+      </div>
+
+      <div id="front-4" class="section-card">
+        <h3 class="section-title">四、 ⚠️ 核心注意事项</h3>
+        <ul class="content-list">
+          <li><span class="highlight-red">控制台密码：</span>控制台密码最高权限密码（默认 521）。此密码可以进入控制台、日记登录、契约秘境持印者解除封印。请务必在后台“基础档案”中将其修改为复杂密码，一旦遗忘，将无法进入控制台修改任何数据。</li>
+          <li><span class="highlight-cyan">门禁密码：</span>默认 240520，请必须记住你们修改之后的密码，若是开启门禁忘记密码，将无法进入网站。</li>
+          <li><span class="highlight">保存机制：</span>在后台控制台，修改完任何文字、上传完任何照片后，<span class="highlight">必须点击右上角的“💾 立即发布生效”按钮</span>。如果不点击，数据不会同步到前台主页。</li>
+          <li><span class="highlight">音频自动播放：</span>受苹果 iOS 与大部分现代浏览器的隐私策略限制，首次进入网页时背景音乐可能无法自动发声。只需<span class="highlight-cyan">在屏幕上任意位置点击一下</span>，音乐即可自动流淌。</li>
+          <li><span class="highlight">上传尺寸限制：</span>基础版单文件上传上限为 3MB，PRO 豪华版为 10MB，PRO 旗舰版为 20MB。尽量避免上传未经压缩的 4K 视频源文件，以免触发风控拦截。</li>
+        </ul>
+      </div>
+
+      <div id="front-5" class="section-card">
+        <h3 class="section-title">五、 常见问题 (FAQ)</h3>
+        
+        <div class="faq-item">
+          <div class="faq-q">Q: 上传的照片被压缩了，会不会糊？</div>
+          <div class="faq-a">不会明显糊。系统用高保真压缩，浏览时几乎无差别，同时大幅节省云空间。若需要更清晰原图，可升级到更高档位获得更大单文件上限。</div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-q">Q: 怎么像软件一样，添加到手机桌面和安装到电脑浏览器？</div>
+          <div class="faq-a">手机端点击分享（或共享）你的网页，在查看更多里面，找到【+添加到主屏幕】，保存（或添加）即可。电脑端的话，在浏览器打开，点击网址栏后面的安装按钮，安装即可。</div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-q">Q: 换域名数据会丢吗？</div>
+          <div class="faq-a">会。数据按域名隔离，请固定使用卖家给你的那个网址，不要随意更换。</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Q: 门禁密码有什么用处？</div>
+          <div class="faq-a">门禁密码默认是：240520可以自己修改。用来拦阻游客的访问。pro版也可以用语音输入密码，用来喊出你想对对方说的话。（语音密码可以后台管理设置）</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Q: 密码忘了怎么办？</div>
+          <div class="faq-a">新密码一定要写进备忘录里，若是真的忘记，联系卖家，只能用技术帮你重置管理员密码，内容不会丢失。但需收取相应技术支持费用。</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Q: 打不开/很慢怎么办？</div>
+          <div class="faq-a">先刷新等一下，首次加载会需要一些时间；仍不行联系卖家（可能是网络或服务器问题）。</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Q: 怎么备份我的数据？</div>
+          <div class="faq-a">目前数据存在云端。如需本地备份，可点击数字永存里面--铸造永恒印记下载到本地。</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Q: 能不能一直在微信使用这个网址？</div>
+          <div class="faq-a"><span class="highlight-red">不推荐一直使用微信打开这个网址！</span>最好使用手机的浏览器。苹果和安卓手机都可以分享网页到添加桌面。电脑端也可以点击网址栏的安装，安装网页应用里面使用。</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Q: 这个网址能用多久？</div>
+          <div class="faq-a">没有永久这一说，因为域名都是每年续费（最多续费10年，所以保证本域名10年都在。）⚠️但注意：需要用户配合，不要在微信里频繁分享和使用（特殊节日用几次没关系），有可能会导致在微信里打不开，最后只能在浏览器打开。</div>
+        </div>
+      </div>
+
+      <div id="front-6" class="section-card" style="margin-bottom: 40px;">
+        <h3 class="section-title">六、 💎 套餐对比与极限容量推测</h3>
+        <p style="font-size:13px; color:var(--text-sub); margin-bottom:15px;">⚠️ 注意：以下估算均为【混合使用情况】的综合总和！实际使用时，照片、语音、音乐是在同一个空间里互相挤占的。</p>
+        
+        <div class="tier-table-wrapper">
+          <table class="tier-table">
+            <thead>
+              <tr>
+                <th width="15%">核心特权对比</th>
+                <th width="25%">🍃 基础免费版<br><span style="font-size:12px; font-weight:normal; color:#94a3b8;">(体验款)</span></th>
+                <th width="30%">💎 PRO 豪华版<br><span style="font-size:12px; font-weight:normal; color:#fde68a;">(👑 80% 情侣首选)</span></th>
+                <th width="30%">👑 PRO 旗舰版<br><span style="font-size:12px; font-weight:normal; color:#38bdf8;">(极致典藏/高客单)</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>浪漫寓意</strong></td>
+                <td>尝鲜体验</td>
+                <td><span class="highlight">365天</span>，每一天都在你身边</td>
+                <td><span class="highlight">521</span>，一生一世我爱你</td>
+              </tr>
+              <tr>
+                <td><strong>云端总容量</strong></td>
+                <td><strong>50 MB</strong><br><span style="font-size:12px; color:#ef4444;">(极易爆仓，需谨慎控制容量)</span></td>
+                <td><strong>365 MB</strong><br><span style="font-size:12px; color:#34d399;">(无忧存储，包容所有心事)</span></td>
+                <td><strong>521 MB</strong><br><span style="font-size:12px; color:#60a5fa;">(海量典藏，装下星辰大海)</span></td>
+              </tr>
+              <tr>
+                <td><strong>单文件上传上限</strong></td>
+                <td>限 3 MB<br><span style="font-size:12px; color:#ef4444;">❌ 易被完整 MP3 歌曲卡住</span></td>
+                <td>限 10 MB<br><span style="font-size:12px; color:#34d399;">✅ 畅传绝大多数高清照片与音乐</span></td>
+                <td>限 20 MB<br><span style="font-size:12px; color:#34d399;">✅ 支持超长无损语音及全景长图</span></td>
+              </tr>
+              <tr>
+                <td><strong>门禁解锁方式</strong></td>
+                <td>仅支持普通数字密码</td>
+                <td>🎙️ <strong>声纹誓言语音开门特权</strong><br><span style="font-size:12px; color:#94a3b8;">(喊出“我爱你”开启时空)</span></td>
+                <td>🎙️ <strong>声纹誓言语音开门特权</strong><br><span style="font-size:12px; color:#94a3b8;">(喊出“我爱你”开启时空)</span></td>
+              </tr>
+              <tr>
+                <td><strong>双视角高奢主题</strong></td>
+                <td>仅限 2 款默认基础主题<br><span style="font-size:12px; color:#94a3b8;">(其余全部毛玻璃锁定)</span></td>
+                <td>🎨 <strong>12 大高阶主题全量解锁</strong><br><span style="font-size:12px; color:#94a3b8;">(含法式初雪、黑金镭射等)</span></td>
+                <td>🎨 <strong>12 大高阶主题全量解锁</strong><br><span style="font-size:12px; color:#94a3b8;">(含法式初雪、黑金镭射等)</span></td>
+              </tr>
+              <tr>
+                <td><strong>控制台尊贵标识</strong></td>
+                <td>无</td>
+                <td>专属 <span class="highlight">PRO</span> 黑金徽章</td>
+                <td>专属 <span class="highlight">👑 PRO 旗舰</span> 黑金皇冠</td>
+              </tr>
+              <tr>
+                <td><strong>综合容量极限推测</strong><br><span style="font-size:11px; color:#94a3b8;">(图+音+歌 混用)</span></td>
+                <td>约 <strong>100张</strong> 照片<br>+ <strong>20条</strong> 短留言<br>+ <strong>3首</strong> 压缩背景曲</td>
+                <td>约 <span class="highlight">800张</span> 照片<br>+ <span class="highlight">100条</span> 语音留言<br>+ <span class="highlight">30首</span> 专属背景曲</td>
+                <td>约 <span class="highlight-cyan">1200张</span> 照片<br>+ <span class="highlight-cyan">200条</span> 长语音<br>+ <span class="highlight-cyan">50首</span> 无损背景曲</td>
+              </tr>
+              <tr>
+                <td><strong>域名</strong></td>
+                <td>英文或数字二级域名</td>
+                <td>英文或数字二级域名</td>
+                <td>支持自定义中文名字二级域名（10年）</td>
+              </tr>
+              <tr>
+                <td><strong>图标</strong></td>
+                <td>默认图标</td>
+                <td>默认图标</td>
+                <td>支持自定义显示图标（可以是你们的任意照片）</td>
+              </tr>
+              <tr>
+                <td><strong>软件安装服务</strong></td>
+                <td>苹果、安卓（添加网页到桌面）；win、Mac（添加应用到浏览器）</td>
+                <td>苹果、安卓（添加网页到桌面）；win、Mac（添加应用到浏览器）</td>
+                <td>苹果、安卓（添加网页到桌面）；win、Mac（添加应用到浏览器）应用图标自定义</td>
+              </tr>
+              <tr>
+                <td><strong>💡 购买建议</strong></td>
+                <td><span style="font-size:13px; color:#94a3b8;">适合随便玩玩。缺点是传不了完整的歌曲，稍微多放几张照片就可能会提醒空间不足，随时可能打断浪漫记录。</span></td>
+                <td><span style="font-size:13px; color:#fde68a; font-weight:bold;">性价比之王，强烈推荐！</span><br><span style="font-size:13px; color:#cbd5e1;">一杯奶茶的钱，买断 10 年的浪漫回忆。拥有最酷的语音开门，功能全部解锁，日常情侣一定够用。</span></td>
+                <td><span style="font-size:13px; color:#bae6fd; font-weight:bold;">尊贵拉满，无悔之选！</span><br><span style="font-size:13px; color:#cbd5e1;">除了拥有以上所有功能之外，拥有最酷的个性中文名字网址、个性自定义图标、个性👑PRO旗舰标，总之，个性！选它！</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="tip-box">
+          <strong>温馨提示：</strong>照片上传前会自动高保真压缩，所以基础版不用担心，基础版也能传高清照片。若遇到「存储已满/单个文件过大」提示，说明空间或单文件达到上限，联系卖家购买升级套餐即可。
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.manual-content').forEach(content => content.classList.remove('active'));
+
+      if (tabName === 'backend') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('backend-manual').classList.add('active');
+      } else if (tabName === 'frontend') {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('frontend-manual').classList.add('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

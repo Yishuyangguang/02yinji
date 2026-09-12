@@ -1,0 +1,367 @@
+/**
+ * 众水不灭 · 雅歌之印
+ * 文件名: css/pet.css
+ * 作用: 恩典灵宠悬浮挂件、5阶神圣形态光环、晋阶进度条与连胜互动弹窗样式 (门禁解锁平滑淡入隔离)
+ */
+
+/* ================= 1. 悬浮灵宠微标 ================= */
+.grace-pet-widget {
+  position: fixed;
+  bottom: 96px;
+  right: 20px;
+  z-index: 55000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateZ(0) scale(0.8);
+  -webkit-transform: translateZ(0) scale(0.8);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.grace-pet-widget.grace-pet-widget--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateZ(0) scale(1);
+  -webkit-transform: translateZ(0) scale(1);
+}
+
+.grace-pet-widget.grace-pet-widget--visible:hover {
+  transform: scale(1.1) translateY(-4px);
+}
+
+.grace-pet-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fef08a, #f59e0b 60%, #b45309 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.8);
+  position: relative;
+  animation: petFloat 3s ease-in-out infinite alternate;
+}
+
+.grace-pet-halo {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(253, 230, 138, 0.7);
+  animation: haloRotate 12s linear infinite;
+  pointer-events: none;
+}
+
+.grace-pet-badge {
+  margin-top: 4px;
+  background: var(--bg-card, rgba(3, 7, 18, 0.88));
+  border: 1px solid var(--accent-gold, rgba(245, 158, 11, 0.45));
+  color: var(--accent-gold, #fde68a);
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 10px;
+  box-shadow: var(--card-shadow, 0 4px 10px rgba(0, 0, 0, 0.4));
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+@keyframes petFloat {
+  0% { transform: translateY(0px) rotate(-2deg); }
+  100% { transform: translateY(-8px) rotate(3deg); }
+}
+
+@keyframes haloRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ================= 2. 灵宠互动弹窗 ================= */
+.grace-pet-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 58000;
+  background: rgba(3, 7, 18, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.grace-pet-dialog {
+  width: 100%;
+  max-width: 480px;
+  /* 🎯 修复: 弹窗背景彻底由全局 CSS 变量接管，实现黑夜白昼一秒切换 */
+  background: var(--bg-card, linear-gradient(180deg, #131b2e 0%, #090d16 100%));
+  border: 1.5px solid var(--border-card, rgba(245, 158, 11, 0.35));
+  border-radius: 26px;
+  padding: 26px 22px;
+  box-shadow: var(--card-shadow, 0 25px 50px rgba(0, 0, 0, 0.75));
+  position: relative;
+  color: var(--text-main, #f8fafc);
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.grace-pet-dialog-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: var(--text-sub, #94a3b8);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.grace-pet-dialog-close:hover { color: var(--text-main, #fff); }
+
+.grace-pet-card-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.grace-pet-big-avatar {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fef08a, #f59e0b 60%, #b45309 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  box-shadow: 0 0 28px rgba(245, 158, 11, 0.7);
+}
+
+.grace-pet-tier-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 3px 12px;
+  border-radius: 20px;
+  border: 1px solid currentColor;
+  margin-bottom: 6px;
+  color: var(--accent-gold, #fbbf24);
+}
+
+.grace-pet-name {
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--text-hero, #ffffff);
+  margin-bottom: 4px;
+}
+
+.grace-pet-sub {
+  font-size: 12px;
+  color: var(--text-sub, #94a3b8);
+  line-height: 1.4;
+}
+
+/* ================= 3. 5阶进化进度条 ================= */
+.grace-level-progress-box {
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.grace-level-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--accent-gold, #fde68a);
+  margin-bottom: 6px;
+}
+
+.grace-level-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.grace-level-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #38bdf8 0%, #f59e0b 50%, #f43f5e 100%);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ================= 4. 统计指标网格 ================= */
+.grace-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.grace-stat-box {
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 8px 4px;
+  text-align: center;
+}
+
+.grace-stat-val {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--accent-gold, #fde68a);
+  margin-bottom: 2px;
+}
+
+.grace-stat-lbl {
+  font-size: 9.5px;
+  color: var(--text-sub, #94a3b8);
+  font-weight: 700;
+}
+
+/* ================= 5. 喂养与舍己操作舱 ================= */
+.grace-action-section {
+  background: var(--bg-overlay, rgba(3, 7, 18, 0.6));
+  border: 1px solid var(--border-card, rgba(245, 158, 11, 0.2));
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.grace-action-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent-gold, #fde68a);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grace-streak-tag {
+  font-size: 10.5px;
+  font-weight: 900;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--accent-gold, #fde68a);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.grace-textarea {
+  width: 100%;
+  background: var(--bg-input, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.15));
+  border-radius: 12px;
+  padding: 10px;
+  color: var(--text-main, #fff);
+  font-size: 13px;
+  resize: none;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.grace-textarea:focus {
+  outline: none;
+  border-color: var(--accent-gold, #f59e0b);
+}
+
+.grace-feed-btn {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  transition: transform 0.2s;
+}
+
+.grace-feed-btn:active { transform: scale(0.98); }
+
+.grace-sacrifice-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  border-radius: 12px;
+  color: #fb7185;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+[data-theme-type="light"] .grace-sacrifice-btn { color: #e11d48; background: rgba(225, 29, 72, 0.1); }
+.grace-sacrifice-btn:hover {
+  background: rgba(244, 63, 94, 0.25);
+  color: #fff;
+}
+
+/* ================= 6. 感恩足迹日志列表 ================= */
+.grace-log-list {
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.grace-log-item {
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.06));
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-main, #cbd5e1);
+  line-height: 1.4;
+}
+
+.grace-log-item span {
+  display: block;
+  font-size: 10px;
+  color: var(--text-sub, #64748b);
+  margin-top: 2px;
+}
+
+/* ================= 7. 移动端适配 (自动 2x2 排列，防溢出) ================= */
+@media (max-width: 640px) {
+  .grace-pet-widget {
+    bottom: 84px;
+    right: 14px;
+  }
+  .grace-pet-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+  .grace-pet-dialog {
+    padding: 20px 16px;
+    border-radius: 22px;
+  }
+  /* 确保弹窗内的 4 个格子也折叠为 2x2，保护极限情况下的长数字 */
+  .grace-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+}

@@ -1,0 +1,213 @@
+/**
+ * 恋爱时光轴 & 漫游宇宙 (Love Universe)
+ * 文件名: css/base.css
+ * 升级：恢复 iOS 原生平滑惯性滚动，优化全屏背景加速图层，彻底杜绝三网与全设备卡顿
+ * 修复：全平台滚动丝滑 + 底部可触达 + 防止橡皮筋回弹
+ */
+
+:root {
+  --primary-pink: #f43f5e;
+  --primary-pink-hover: #e11d48;
+  --rose-gold: #fb7185;
+  --rose-gold-glow: rgba(251, 113, 133, 0.35);
+  
+  --sun-gold: #f59e0b;
+  --sun-gold-glow: rgba(245, 158, 11, 0.35);
+  --warm-amber: #fef3c7;
+
+  --space-dark: #070a14;
+  --space-navy: #0b1120;
+  --space-card: rgba(20, 20, 38, 0.72);
+  
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-shine: rgba(255, 255, 255, 0.25);
+  --glass-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6);
+  
+  --polaroid-paper: #ffffff;
+  --polaroid-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 4px 10px rgba(0, 0, 0, 0.2);
+  
+  --text-pure: #ffffff;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dark: #1f2937;
+  
+  --stamp-red: #dc2626;
+  --stamp-red-glow: rgba(220, 38, 38, 0.4);
+  --success-green: #10b981;
+  
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  background-color: var(--space-dark);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  /* 🔧 防止 iOS/Android 橡皮筋回弹效果 */
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
+  /* 🔧 允许纵向惯性滚动 */
+  touch-action: pan-y;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  background-color: var(--space-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  line-height: 1.6;
+  /* 🔧 增大底部内边距，确保 footer 可完整滚动到视口 */
+  padding-bottom: max(120px, env(safe-area-inset-bottom));
+  /* 🔧 iOS Safari 原生平滑惯性滚动 */
+  -webkit-overflow-scrolling: touch;
+  /* 🔧 仅允许纵向手势 */
+  touch-action: pan-y;
+  /* 🔧 防止整个页面的橡皮筋回弹 */
+  overscroll-behavior-y: none;
+  -webkit-overscroll-behavior-y: none;
+}
+
+/* 🖼️ 独立硬件加速全视口固定背景层 (精准填满视口，消除 100vw 引起的横向滑动) */
+.universe-bg-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  z-index: -10;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform, background-image;
+  transition: background-image 0.4s ease;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+button, input, textarea {
+  font-family: inherit;
+  outline: none;
+  border: none;
+  background: none;
+}
+
+/* 🌅 微醺星河暖色暮光默认基底 */
+.universe-body {
+  background-color: var(--space-dark);
+}
+
+.main-container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  /* 🔧 增大底部 padding，确保所有模块（含大间距 footer）都能完整展示 */
+  padding: 24px 18px 40px;
+  position: relative;
+  z-index: 10;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring);
+  overflow-x: hidden;
+  /* 🔧 确保主容器不阻止纵向滚动 */
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
+.main-container--hidden {
+  opacity: 0;
+  transform: translateY(30px);
+  pointer-events: none;
+  display: none;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-title__icon {
+  font-size: 28px;
+  filter: drop-shadow(0 0 10px var(--rose-gold-glow));
+}
+
+.section-title__text {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #ffffff 0%, #fde68a 50%, #fb7185 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(251, 113, 133, 0.3);
+}
+
+.section-title__desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* 🔧 自定义滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(7, 10, 20, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--rose-gold), var(--primary-pink));
+  border-radius: 6px;
+  box-shadow: 0 0 8px var(--rose-gold-glow);
+}
+
+/* 🔧 Firefox 滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rose-gold) rgba(7, 10, 20, 0.8);
+}
+
+/* 🔧 全局链接与交互元素防误触优化 */
+a, button, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* 🔧 移动端滚动容器内部元素禁止横向溢出 */
+section, article, aside, header, footer, main {
+  max-width: 100vw;
+  overflow-x: hidden;
+}

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>雅歌之印 · 同行约定</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+  <link rel="stylesheet" href="css/themes.css?v=2.5">
+
+  <script>
+    (function() {
+      const themeId = localStorage.getItem("love_current_theme_id") || "sunset-twilight";
+      const perspective = localStorage.getItem("love_user_perspective") || "boy";
+      const themeType = (perspective === "girl" || themeId.includes("cream") || themeId.includes("sakura") || themeId.includes("monet") || themeId.includes("dew") || themeId.includes("blush") || themeId.includes("orange")) ? "light" : "dark";
+      
+      document.documentElement.setAttribute("data-theme-type", themeType);
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.classList.add(`theme-${themeId}`);
+        document.body.setAttribute("data-theme-type", themeType);
+
+        const customBg = localStorage.getItem("love_current_custom_bg");
+        if (customBg) {
+          const bgEl = document.getElementById("universe-bg-layer");
+          if (bgEl) {
+            const scrim = themeType === "light" 
+              ? "linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4))"
+              : "linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45))";
+            bgEl.style.backgroundImage = `${scrim}, url('${customBg}')`;
+          }
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 4px; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+      color: var(--text-main, #f8fafc);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: calc(60px + env(safe-area-inset-bottom));
+      transition: color 0.3s;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    .top-header {
+      display: grid;
+      grid-template-columns: 100px 1fr 100px;
+      align-items: center;
+      padding: max(20px, env(safe-area-inset-top)) 16px 12px;
+      position: sticky;
+      top: 0;
+      background: var(--bg-card, rgba(15, 23, 42, 0.85));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      border-bottom: 1px solid var(--border-card, rgba(255,255,255,0.05));
+    }
+    .back-btn {
+      justify-self: start;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-main, #fff); padding: 8px 12px; border-radius: 20px; font-size: 13.5px; font-weight: 700;
+      cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center;
+    }
+    .page-title { 
+      justify-self: center;
+      font-size: 17.5px; font-weight: 900; color: var(--text-main, #e2e8f0); 
+      letter-spacing: 1px; white-space: nowrap;
+    }
+
+    .capsule-nav-container {
+      width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; padding: 16px 0 16px;
+    }
+    .capsule-nav-container::-webkit-scrollbar { display: none; }
+    .capsule-nav-scroll {
+      display: flex; gap: 10px; width: max-content; padding: 0 16px; margin: 0 auto;
+    }
+    .capsule-btn {
+      background: var(--bg-card, rgba(255,255,255,0.06)); 
+      border: 1px solid var(--border-card, rgba(255,255,255,0.1));
+      color: var(--text-sub, #94a3b8); border-radius: 24px; padding: 12px 20px;
+      font-size: 14px; font-weight: 800; white-space: nowrap; cursor: pointer; transition: 0.3s;
+    }
+    .capsule-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35); border-color: transparent;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .capsule-nav-container { padding: 12px 16px 16px; overflow: visible; }
+      .capsule-nav-scroll { width: 100%; padding: 0; flex-wrap: wrap; justify-content: center; gap: 10px 8px; }
+      .capsule-btn { flex: 1 1 calc(33.333% - 6px); padding: 10px 4px; font-size: 13px; text-align: center; display: flex; justify-content: center; align-items: center; }
+      .capsule-btn:nth-child(4), .capsule-btn:nth-child(5) { flex: 0 1 calc(50% - 4px); max-width: 160px; }
+    }
+
+    .neon-progress-wrap {
+      padding: 0 16px 16px; position: sticky;
+      top: calc(max(20px, env(safe-area-inset-top)) + 45px);
+      z-index: 90; background: var(--bg-primary, #090d16);
+    }
+    .neon-progress-meta { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 800; color: var(--text-sub, #cbd5e1); margin-bottom: 8px; }
+    .neon-progress-meta span.highlight { color: #f59e0b; }
+    .neon-progress-bar { height: 6px; border-radius: 3px; background: rgba(0,0,0,0.15); overflow: hidden; }
+    .neon-progress-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #a855f7, #f43f5e);
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.8);
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .checklist-wrapper { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+    
+    .task-card {
+      background: var(--bg-card, rgba(30, 41, 59, 0.5)); 
+      border: 1px solid var(--border-card, rgba(255, 255, 255, 0.05));
+      border-radius: 20px; padding: 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--card-shadow, 0 4px 16px rgba(0,0,0,0.05));
+    }
+    .task-card-left {
+      display: flex; align-items: flex-start; gap: 16px; flex: 1; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    .task-card-left:active { transform: scale(0.98); }
+    
+    .task-card.completed { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.35); }
+    .task-card.pinned { border-color: rgba(245, 158, 11, 0.5); background: linear-gradient(145deg, rgba(245, 158, 11, 0.08) 0%, rgba(30, 41, 59, 0.5) 100%); }
+    
+    .task-text { flex: 1; font-size: 15px; line-height: 1.6; color: var(--text-main, #f8fafc); font-weight: 600; transition: all 0.3s; }
+    .task-card.completed .task-text { opacity: 0.45; text-decoration: line-through; color: var(--text-sub, #94a3b8); }
+
+    .check-svg { width: 26px; height: 26px; flex-shrink: 0; margin-top: -2px; }
+    .check-svg circle { transition: all 0.4s; stroke: var(--border-card, rgba(255,255,255,0.2)); }
+    .task-card.completed .check-svg circle { fill: rgba(245, 158, 11, 0.15); stroke: #f59e0b; }
+    .check-path { stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .task-card.completed .check-path { stroke-dashoffset: 0; }
+
+    /* 🌟 置顶按钮样式 */
+    .pin-btn {
+      background: transparent; border: none; font-size: 20px; cursor: pointer;
+      opacity: 0.2; transition: all 0.3s; padding: 6px; border-radius: 50%;
+      -webkit-tap-highlight-color: transparent; outline: none; flex-shrink: 0;
+    }
+    .pin-btn:hover { opacity: 0.8; background: rgba(255,255,255,0.1); }
+    .pin-btn.pinned { opacity: 1; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)); transform: scale(1.15); }
+
+    .toast-msg {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: rgba(15, 23, 42, 0.95); color: #fff; padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; font-weight: 800; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+      z-index: 60000; opacity: 0; pointer-events: none; transition: all 0.3s; white-space: nowrap;
+    }
+    .toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* 🌟 高定展览锁定面板样式 */
+    .exhibition-lock-panel {
+      margin-top: 32px; text-align: center; padding: 32px 24px;
+      background: var(--bg-card, rgba(255,255,255,0.03)); border: 1.5px dashed var(--border-card, rgba(255,255,255,0.15));
+      border-radius: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .exhibition-lock-icon { font-size: 42px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5)); margin-bottom: 8px; }
+    .exhibition-lock-title { color: var(--text-hero, #e2e8f0); font-size: 16px; font-weight: 800; letter-spacing: 1px; }
+    .exhibition-lock-desc { color: var(--text-sub, #94a3b8); font-size: 13.5px; line-height: 1.6; }
+
+    /* 🌟 核心增设：黑金风反悔确认弹窗 (全方位刘海/横条安全适配) */
+    .custom-modal-backdrop {
+      position: fixed; inset: 0; z-index: 99999;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+      padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+    }
+    .custom-modal-backdrop.active { opacity: 1; pointer-events: auto; }
+    .custom-modal-dialog {
+      background: linear-gradient(145deg, #1e293b 0%, #020617 100%);
+      border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 24px;
+      padding: 36px 24px 28px; width: 100%; max-width: 340px; text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.1);
+      transform: scale(0.9) translateY(20px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .custom-modal-backdrop.active .custom-modal-dialog { transform: scale(1) translateY(0); }
+    .custom-modal-icon { font-size: 46px; margin-bottom: 16px; filter: drop-shadow(0 4px 12px rgba(245,158,11,0.5)); line-height: 1; }
+    .custom-modal-title { font-size: 19px; font-weight: 900; color: #f8fafc; margin-bottom: 10px; letter-spacing: 1px; }
+    .custom-modal-desc { font-size: 14px; color: #94a3b8; margin-bottom: 28px; line-height: 1.6; }
+    .custom-modal-actions { display: flex; gap: 12px; }
+    .custom-modal-btn { flex: 1; padding: 14px; border-radius: 16px; font-size: 15px; font-weight: 800; cursor: pointer; border: none; transition: 0.2s; }
+    .custom-modal-btn.cancel { background: rgba(255,255,255,0.08); color: #cbd5e1; }
+    .custom-modal-btn.cancel:active { background: rgba(255,255,255,0.15); }
+    .custom-modal-btn.confirm { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; box-shadow: 0 4px 14px rgba(245,158,11,0.4); }
+    .custom-modal-btn.confirm:active { transform: scale(0.96); }
+  </style>
+</head>
+<body>
+
+  <div id="universe-bg-layer" class="universe-bg-layer"></div>
+  <div id="toastMsg" class="toast-msg">✓ 操作成功</div>
+
+  <div class="container">
+    <header class="top-header">
+      <a href="index.html" class="back-btn">➔ 返回星轨</a>
+      <span class="page-title">同行约定清单</span>
+      <div></div> 
+    </header>
+
+    <div class="capsule-nav-container">
+      <div class="capsule-nav-scroll">
+        <button class="capsule-btn active" id="tab-1" onclick="switchPhase(1)">❤️ 恋爱期</button>
+        <button class="capsule-btn" id="tab-2" onclick="switchPhase(2)">💍 订婚期</button>
+        <button class="capsule-btn" id="tab-3" onclick="switchPhase(3)">🏠 结婚期</button>
+        <button class="capsule-btn" id="tab-4" onclick="switchPhase(4)">🍼 孕期前后</button>
+        <button class="capsule-btn" id="tab-5" onclick="switchPhase(5)">🚀 婚后进阶</button>
+      </div>
+    </div>
+
+    <div class="neon-progress-wrap">
+      <div class="neon-progress-meta">
+        <span id="phase-title">恋爱期目标</span>
+        <span id="progress-text">已达成 <span class="highlight">0</span> / 0 项</span>
+      </div>
+      <div class="neon-progress-bar">
+        <div class="neon-progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="checklist-wrapper" id="checklist-wrapper"></div>
+  </div>
+
+  <!-- 🌟 新增：黑金风状态反悔拦截弹窗 -->
+  <div id="uncompleteModal" class="custom-modal-backdrop">
+    <div class="custom-modal-dialog">
+      <div class="custom-modal-icon">✨</div>
+      <h3 class="custom-modal-title">重新激活心愿</h3>
+      <p class="custom-modal-desc">时光不可逆，但爱可以包容。确定要将该约定重新加入未完成待办事项吗？</p>
+      <div class="custom-modal-actions">
+        <button class="custom-modal-btn cancel" onclick="closeUncompleteModal()">取消操作</button>
+        <button class="custom-modal-btn confirm" onclick="confirmUncomplete()">确定加入</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/stage-content.js?v=2.5"></script>
+  <script>
+    let appData = [];
+    let currentPhase = 1;
+    let audioCtx = null;
+    let isSaving = false;
+    let pendingUncompleteId = null; // 用于记录当前准备撤销的心愿ID
+
+    function isOwnerDevice() {
+      return !!localStorage.getItem("love_owner_token");
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      initAudioContext();
+      await fetchCloudConfig();
+      renderChecklist();
+    });
+
+    function initAudioContext() {
+      const unlock = () => {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx && !audioCtx) audioCtx = new AudioCtx();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        document.removeEventListener("touchstart", unlock);
+        document.removeEventListener("click", unlock);
+      };
+      document.addEventListener("touchstart", unlock, { once: true });
+      document.addEventListener("click", unlock, { once: true });
+    }
+
+    function playDingSound() {
+      try {
+        if (!audioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) audioCtx = new AudioCtx();
+        }
+        if (!audioCtx) return;
+        if (audioCtx.state === "suspended") audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1200, audioCtx.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1); 
+        
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+      } catch(e) {}
+    }
+
+    // 🌟 核心并集算法升级：防止覆盖初始内置数据，同时支持动态增量
+    function buildChecklistData(cloudChecklist) {
+      const cloudMap = {};
+      if (Array.isArray(cloudChecklist)) {
+        cloudChecklist.forEach(item => {
+          // 通过 phase 和 title 的组合作为唯一哈希键，防止控制台新加的项目重复
+          const key = `${item.phase}_${(item.title||"").trim()}`;
+          cloudMap[key] = item;
+        });
+      }
+
+      const mergedList = [];
+      let idCounter = 1;
+      const phasesMap = [
+        { key: 'dating', p: 1 }, { key: 'engaged', p: 2 }, { key: 'married', p: 3 }, 
+        { key: 'pregnancy', p: 4 }, { key: 'advanced', p: 5 }
+      ];
+
+      // 1. 铺设内置的 100 条底座数据
+      phasesMap.forEach(ph => {
+        if (window.STAGE_CONTENT && window.STAGE_CONTENT[ph.key] && window.STAGE_CONTENT[ph.key].checklist) {
+          window.STAGE_CONTENT[ph.key].checklist.forEach(item => {
+            const key = `${ph.p}_${(item.title||"").trim()}`;
+            if (cloudMap[key]) {
+              // 沿用云端的用户状态 (包含完成状态和置顶状态)
+              mergedList.push({
+                id: cloudMap[key].id || idCounter++,
+                phase: ph.p,
+                title: item.title,
+                completed: cloudMap[key].completed || false,
+                isPinned: cloudMap[key].isPinned || false
+              });
+              delete cloudMap[key]; // 标记为已处理
+            } else {
+              // 全新的底座数据
+              mergedList.push({ id: idCounter++, phase: ph.p, title: item.title, completed: false, isPinned: false });
+            }
+          });
+        }
+      });
+
+      // 2. 将云端剩余的用户自定义新增项合并进去
+      Object.values(cloudMap).forEach(cloudItem => {
+        if (!cloudItem.id) cloudItem.id = idCounter++;
+        mergedList.push(cloudItem);
+      });
+
+      return mergedList;
+    }
+
+    async function fetchCloudConfig() {
+      try {
+        const res = await fetch("/api/love/config");
+        const data = await res.json();
+        if (data.success && data.config) {
+          window.LOVE_CONFIG = data.config;
+          appData = buildChecklistData(data.config.checklist100);
+        } else {
+          appData = buildChecklistData([]);
+        }
+      } catch (_) {
+        appData = buildChecklistData([]);
+      }
+    }
+
+    function switchPhase(phase) {
+      currentPhase = phase;
+      document.querySelectorAll(".capsule-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(`tab-${phase}`).classList.add("active");
+
+      const titles = { 1: "恋爱期目标", 2: "订婚期目标", 3: "结婚期目标", 4: "孕期前后目标", 5: "婚后进阶目标" };
+      document.getElementById("phase-title").textContent = titles[phase];
+
+      renderChecklist();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toastMsg");
+      t.innerText = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2500);
+    }
+
+    // 🌟 核心：三级动态排序渲染引擎
+    function renderChecklist() {
+      const container = document.getElementById("checklist-wrapper");
+      container.innerHTML = "";
+
+      let phaseItems = appData.filter(i => i.phase === currentPhase);
+      const total = phaseItems.length;
+      let completedCount = 0;
+
+      phaseItems.forEach(item => {
+        if (item.completed) completedCount++;
+      });
+      updateProgressUI(completedCount, total);
+
+      // 隔离游客
+      if (!isOwnerDevice()) {
+        container.innerHTML = `
+          <div class="exhibition-lock-panel">
+            <div class="exhibition-lock-icon">🔒</div>
+            <div class="exhibition-lock-title">展览模式：同行约定清单已锁定</div>
+            <div class="exhibition-lock-desc">
+              这是属于他们最私密的独家心愿<br>
+              <span style="font-size:12px; margin-top:4px; display:inline-block; opacity:0.8;">※ 仅持印者设备有权限查看详情与点亮</span>
+            </div>
+          </div>
+        `;
+        return; 
+      }
+
+      // 🌟 三重权重排序: 1. 未完成且置顶的排最前 -> 2. 未完成的居中 -> 3. 已完成的全部沉底
+      phaseItems.sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        if (!a.completed && !b.completed) {
+          if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+        }
+        return 0; // 维持默认的底层顺序
+      });
+
+      phaseItems.forEach(item => {
+        const card = document.createElement("div");
+        card.className = `task-card ${item.completed ? 'completed' : ''} ${item.isPinned && !item.completed ? 'pinned' : ''}`;
+        
+        // 左侧点击区域 (含勾选动画)
+        const leftDiv = document.createElement("div");
+        leftDiv.className = "task-card-left";
+        leftDiv.onclick = () => handleItemClick(item.id, card);
+        leftDiv.innerHTML = `
+          <svg class="check-svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="transparent" stroke-width="2"></circle>
+            <path class="check-path" d="M7 13l3 3 7-7" fill="transparent" stroke="#f59e0b" stroke-width="2.5"></path>
+          </svg>
+          <div class="task-text">${escapeHtml(item.title)}</div>
+        `;
+        card.appendChild(leftDiv);
+
+        // 右侧置顶模块 (已完成的项目自动隐藏置顶钉子)
+        if (!item.completed) {
+          const pinBtn = document.createElement("button");
+          pinBtn.className = `pin-btn ${item.isPinned ? 'pinned' : ''}`;
+          pinBtn.innerHTML = "📌";
+          pinBtn.title = item.isPinned ? "取消置顶" : "设为置顶 (最多3个)";
+          pinBtn.onclick = (e) => {
+            e.stopPropagation();
+            togglePin(item.id);
+          };
+          card.appendChild(pinBtn);
+        }
+
+        container.appendChild(card);
+      });
+    }
+
+    // 🌟 置顶开关机制限制 (最多3个)
+    function togglePin(id) {
+      if (!isOwnerDevice()) return;
+      const item = appData.find(i => i.id === id);
+      if (!item) return;
+
+      if (!item.isPinned) {
+        const phaseItems = appData.filter(i => i.phase === currentPhase && !i.completed);
+        const pinnedCount = phaseItems.filter(i => i.isPinned).length;
+        if (pinnedCount >= 3) {
+          showToast("⚠️ 每个阶段最多只能置顶 3 个核心待办哦~");
+          return;
+        }
+      }
+      
+      item.isPinned = !item.isPinned;
+      renderChecklist();
+      syncDataToR2_Silent();
+    }
+
+    // 🌟 核心状态扭转引擎
+    function handleItemClick(id, cardEl) {
+      if (!isOwnerDevice()) return;
+      const item = appData.find(i => i.id === id);
+      if (!item) return;
+
+      if (item.completed) {
+        // 触发高奢反悔拦截盾
+        pendingUncompleteId = id;
+        document.getElementById("uncompleteModal").classList.add("active");
+      } else {
+        // 正常完成并打卡
+        item.completed = true;
+        item.isPinned = false; // 完成后自动失去置顶特权
+        
+        cardEl.classList.add('completed');
+        cardEl.classList.remove('pinned');
+        playDingSound();
+        if (navigator.vibrate) navigator.vibrate([40]);
+        
+        const phaseItems = appData.filter(i => i.phase === currentPhase);
+        const completedCount = phaseItems.filter(i => i.completed).length;
+        updateProgressUI(completedCount, phaseItems.length);
+
+        // 延迟 450ms 让用户爽完打卡动画后，再进行 DOM 排序沉底，提升丝滑感
+        setTimeout(() => {
+          renderChecklist();
+          syncDataToR2_Silent();
+          window.dispatchEvent(new CustomEvent("achievement:trigger", {
+            detail: { type: "checklist_updated", completedCount: appData.filter(x => x.completed).length }
+          }));
+        }, 450);
+      }
+    }
+
+    function closeUncompleteModal() {
+      document.getElementById("uncompleteModal").classList.remove("active");
+      pendingUncompleteId = null;
+    }
+
+    function confirmUncomplete() {
+      if (pendingUncompleteId) {
+        const item = appData.find(i => i.id === pendingUncompleteId);
+        if (item) {
+          item.completed = false; // 重新激活
+          
+          const phaseItems = appData.filter(i => i.phase === currentPhase);
+          const completedCount = phaseItems.filter(i => i.completed).length;
+          updateProgressUI(completedCount, phaseItems.length);
+          
+          renderChecklist();
+          syncDataToR2_Silent();
+        }
+      }
+      closeUncompleteModal();
+    }
+
+    function updateProgressUI(current, total) {
+      const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+      document.getElementById("progress-text").innerHTML = `已达成 <span class="highlight">${current}</span> / ${total} 项`;
+      document.getElementById("progress-fill").style.width = `${pct}%`;
+    }
+
+    async function syncDataToR2_Silent() {
+      if (!isOwnerDevice()) return;
+      if (isSaving) return;
+      isSaving = true;
+      
+      const token = localStorage.getItem("love_owner_token") || localStorage.getItem("love_admin_token") || "";
+      try {
+        const config = window.LOVE_CONFIG || {};
+        config.checklist100 = appData;
+        await fetch(`/api/love/config?auth=${encodeURIComponent(token)}`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json", 
+            "x-admin-auth": token, 
+            "Authorization": `Bearer ${token}` 
+          },
+          body: JSON.stringify({ config: config })
+        });
+      } catch (_) {}
+      finally {
+        isSaving = false;
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>

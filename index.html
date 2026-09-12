@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <meta property="og:title" content="💌 我们的雅歌之印 · 恒久印记">
+  <meta property="og:description" content="众水不能熄灭爱情，大水不能淹没">
+  <meta property="og:image" content="assets/images/share-cover.jpg">
+
+  <title>众水不灭 · 我们的恒久印记</title>
+
+  <script>
+    (function() {
+      if (sessionStorage.getItem("universe_unlocked") === "true") {
+        document.documentElement.classList.add("fast-unlock");
+      }
+      if (localStorage.getItem("love_owner_token")) {
+        document.documentElement.classList.add("is-owner");
+      }
+    })();
+  </script>
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2.5">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=2.5">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2.5">
+  <link rel="manifest" href="manifest.json?v=2.5">
+  
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="雅歌之印">
+
+  <link rel="stylesheet" href="css/base.css?v=2.5">
+  <link rel="stylesheet" href="css/components.css?v=2.6">
+  <link rel="stylesheet" href="css/animations.css?v=2.5">
+  <link rel="stylesheet" href="css/themes.css?v=2.5">
+  <link rel="stylesheet" href="css/anniversary.css?v=2.5">
+  <link rel="stylesheet" href="css/icebreaker.css?v=2.5">
+  <link rel="stylesheet" href="css/photo-wall.css?v=2.5">
+  <link rel="stylesheet" href="css/pet.css?v=2.5">
+  <link rel="stylesheet" href="css/pet-badges.css?v=2.5">
+  <link rel="stylesheet" href="css/scratch-card.css?v=2.5">
+  <style>
+    html.fast-unlock #gatekeeper-screen { display: none !important; }
+    html.fast-unlock #main-container { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
+    html.fast-unlock .main-container--hidden { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; pointer-events: auto !important; }
+
+    .perspective-capsule {
+      position: fixed;
+      top: max(18px, env(safe-area-inset-top, 18px));
+      right: 18px;
+      z-index: 100;
+      display: flex;
+      background: rgba(3, 7, 18, 0.75);
+      border: 1.5px solid rgba(245, 158, 11, 0.4);
+      border-radius: 26px;
+      padding: 3.5px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      transform: translateZ(0);
+    }
+    .perspective-btn {
+      padding: 7px 15px;
+      border-radius: 20px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 12.5px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+    .perspective-btn#btn-perspective-boy.active {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 12px rgba(56, 189, 248, 0.45);
+    }
+    .perspective-btn#btn-perspective-girl.active {
+      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 12px rgba(244, 63, 94, 0.45);
+    }
+    .easter-egg-trigger--star {
+      position: fixed;
+      top: max(72px, calc(env(safe-area-inset-top, 0px) + 68px)) !important;
+      right: 22px !important;
+      z-index: 90 !important;
+    }
+    .phase-switch-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 16px auto 16px auto;
+      max-width: 480px;
+      padding: 6px;
+      background: rgba(3, 7, 18, 0.6);
+      border: 1.5px solid rgba(245, 158, 11, 0.3);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      transform: translateZ(0);
+    }
+    .phase-tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+    .phase-tab-btn.active {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+      transform: scale(1.02);
+    }
+    .romantic-rose-container {
+      position: fixed; 
+      inset: 0;
+      z-index: 0; 
+      display: flex;
+      flex-direction: row;
+      pointer-events: none; 
+      opacity: 0;
+      transition: opacity 1.5s ease-in;
+    }
+    .romantic-canvas-wrap { flex: 1; width: 100%; height: 100%; position: relative; }
+    .romantic-canvas-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    @media (max-width: 768px) {
+      .romantic-rose-container { flex-direction: column; }
+      .romantic-canvas-wrap:nth-child(1) { flex: 0.35; }
+      .romantic-canvas-wrap:nth-child(2) { flex: 0.65; }
+    }
+    .gatekeeper__dialog { transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important; }
+    .gatekeeper__dialog--hidden { opacity: 0 !important; pointer-events: none !important; transform: scale(0.9) translateY(20px) !important; }
+    .grace-badge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+      gap: 12px;
+      padding: 10px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 480px) {
+      .grace-badge-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px;
+      }
+    }
+
+    /* 🌟 恢复：后台控制台黑金密码验证弹窗样式 */
+    .hq-auth-modal {
+      position: fixed; inset: 0; z-index: 999999; display: none; align-items: center; justify-content: center;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hq-auth-modal.active { opacity: 1; display: flex !important; }
+    .hq-auth-dialog {
+      background: linear-gradient(145deg, #1e293b 0%, #020617 100%);
+      border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 24px; padding: 36px 24px 28px;
+      width: 90%; max-width: 360px; text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.15);
+      transform: scale(0.95) translateY(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hq-auth-modal.active .hq-auth-dialog { transform: scale(1) translateY(0); }
+    .hq-auth-icon { font-size: 48px; margin-bottom: 12px; line-height: 1; filter: drop-shadow(0 4px 16px rgba(245, 158, 11, 0.6)); }
+    .hq-auth-title { font-size: 20px; font-weight: 900; color: #f8fafc; margin-bottom: 8px; letter-spacing: 1px; }
+    .hq-auth-desc { font-size: 13px; color: #94a3b8; margin-bottom: 24px; line-height: 1.5; }
+    .hq-auth-input {
+      width: 100%; background: rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px; padding: 14px; font-size: 16px; color: #fff; text-align: center; outline: none;
+      transition: all 0.3s ease; font-family: ui-monospace, monospace; letter-spacing: 2px; margin-bottom: 20px;
+    }
+    .hq-auth-input:focus { border-color: #f59e0b; background: rgba(0, 0, 0, 0.6); box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2); }
+    .hq-auth-actions { display: flex; gap: 12px; width: 100%; }
+    .hq-btn-cancel, .hq-btn-confirm { flex: 1; padding: 14px; border-radius: 16px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; border: none; }
+    .hq-btn-cancel { background: rgba(255, 255, 255, 0.08); color: #cbd5e1; }
+    .hq-btn-cancel:active { background: rgba(255, 255, 255, 0.12); }
+    .hq-btn-confirm { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4); }
+    .hq-btn-confirm:active { transform: scale(0.97); }
+    .hq-auth-error { color: #f43f5e; font-size: 12px; font-weight: 700; margin-top: -10px; margin-bottom: 16px; display: none; }
+
+    .guest-toast {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: rgba(15, 23, 42, 0.95); color: #fff; padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; font-weight: 800; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px); z-index: 999999; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .guest-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    
+    /* 🌟 核心拦截 1：标题栏禁止选词 */
+    .hub-dock__header {
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+    .longpress-overlay {
+      position: absolute; inset: -15px -10px; z-index: 9999 !important; cursor: pointer; border-radius: inherit;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+      pointer-events: auto !important;
+    }
+
+    /* 🌟 核心拦截 2：物理级 CSS 刮刮卡只读隔离盾 */
+    body:not(.is-owner) #scratch-container {
+      display: none !important;
+    }
+    body:not(.is-owner) #scratch-guest-lock {
+      display: block !important;
+    }
+    body.is-owner #scratch-guest-lock {
+      display: none !important;
+    }
+    body.is-owner #scratch-container {
+      display: grid !important;
+    }
+
+    /* 🌟 核心修复：移动端同行守护计时器 5 联数字卡片自适应防溢出引擎 */
+    .love-timer {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }
+    .love-timer__grid {
+      display: grid !important;
+      grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+      gap: 6px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      padding: 0 !important;
+      margin: 0 auto !important;
+    }
+    .love-timer__unit {
+      min-width: 0 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      padding: 10px 2px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .love-timer__num {
+      font-size: clamp(16px, 4.5vw, 24px) !important;
+      line-height: 1.15 !important;
+      word-break: break-all !important;
+      white-space: nowrap !important;
+      text-align: center !important;
+    }
+    .love-timer__label {
+      font-size: clamp(10px, 2.8vw, 13px) !important;
+      margin-top: 4px !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+    }
+
+    @media (max-width: 640px) {
+      .love-timer {
+        padding: 16px 10px !important;
+      }
+      .love-timer__grid {
+        gap: 5px !important;
+      }
+      .love-timer__unit {
+        padding: 8px 1px !important;
+        border-radius: 12px !important;
+      }
+      .love-timer__num {
+        font-size: 18px !important;
+      }
+      .love-timer__label {
+        font-size: 11px !important;
+        margin-top: 3px !important;
+      }
+    }
+  </style>
+</head>
+<body class="universe-body">
+
+  <div id="guestAlertToast" class="guest-toast">💌 展览模式：仅持印者可操作哦~</div>
+
+  <div id="universe-bg-layer" class="universe-bg-layer"></div>
+
+  <div id="icebreaker-banner" class="icebreaker-banner">
+    <span class="icebreaker-banner__icon">🕊️</span>
+    <span id="icebreaker-banner-text" class="icebreaker-banner__text">收到对方递来的一封信笺...</span>
+    <span class="icebreaker-banner__arrow">查看 ➔</span>
+  </div>
+
+  <div class="perspective-capsule" id="perspective-capsule">
+    <button class="perspective-btn active" id="btn-perspective-boy" onclick="window.ThemeEngine.switchPerspective('boy')">🪐 他的星河</button>
+    <button class="perspective-btn" id="btn-perspective-girl" onclick="window.ThemeEngine.switchPerspective('girl')">🌸 她的花汐</button>
+  </div>
+
+  <div id="parallax-photo-wall" class="parallax-photo-wall"></div>
+  <canvas id="starry-canvas" class="universe-canvas"></canvas>
+  <canvas id="fireworks-canvas" class="fireworks-canvas"></canvas>
+
+  <section id="gatekeeper-screen" class="gatekeeper">
+    <div class="romantic-rose-container" id="romantic-rose-container">
+      <div class="romantic-canvas-wrap"><canvas id="rose-code-canvas"></canvas></div>
+      <div class="romantic-canvas-wrap"><canvas id="rose-particle-canvas"></canvas></div>
+    </div>
+    <div id="rose-click-overlay" style="position: absolute; inset: 0; z-index: 5; cursor: pointer;" title="点击唤醒专属时空"></div>
+    
+    <div class="gatekeeper__dialog gatekeeper__dialog--hidden" id="gatekeeper-dialog">
+      <div class="gatekeeper__header">
+        <div class="gatekeeper__badge">SACRED ARCHIVE</div>
+        <h2 class="gatekeeper__title" id="gatekeeper-title">🔒 验证恒久契约</h2>
+      </div>
+      <div class="gatekeeper__content">
+        <p class="gatekeeper__question" id="gatekeeper-question">请输入纪念日口令，或点击麦克风念出誓言：</p>
+        <div class="gatekeeper__input-group">
+          <input type="password" id="gatekeeper-input" class="gatekeeper__input" placeholder="输入口令..." maxlength="20" autocomplete="off">
+          <button id="voice-unlock-btn" class="btn-universe btn-universe--secondary voice-unlock-btn" title="点击念出誓言">🎙️</button>
+        </div>
+        <p class="gatekeeper__hint" id="gatekeeper-hint">提示：包容与接纳，爱是永不止息</p>
+      </div>
+      <div class="gatekeeper__footer">
+        <button id="gatekeeper-btn" class="btn-universe gatekeeper__btn">
+          <span>开启专属时空</span>
+          <span class="gatekeeper__btn-icon">➔</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <main id="main-container" class="main-container main-container--hidden">
+    <header class="hero-section">
+      <h1 class="hero-section__names" id="hero-names">张小阳 <span class="name-connector">&</span> 李小光</h1>
+      <div class="hero-section__badge">THE ETERNAL SEAL</div>
+      <p class="hero-section__subtitle" id="hero-subtitle">众水不能熄灭爱情，大水不能淹没 · 一生一世的契约</p>
+      <div class="love-timer">
+        <div class="love-timer__title">我们已经同行并守护了</div>
+        <div class="love-timer__grid" id="timer-grid">
+          <div class="love-timer__unit"><span class="love-timer__num" id="timer-years">0</span><span class="love-timer__label">年</span></div>
+          <div class="love-timer__unit"><span class="love-timer__num" id="timer-days">000</span><span class="love-timer__label">天</span></div>
+          <div class="love-timer__unit"><span class="love-timer__num" id="timer-hours">00</span><span class="love-timer__label">时</span></div>
+          <div class="love-timer__unit"><span class="love-timer__num" id="timer-minutes">00</span><span class="love-timer__label">分</span></div>
+          <div class="love-timer__unit"><span class="love-timer__num" id="timer-seconds">00</span><span class="love-timer__label">秒</span></div>
+        </div>
+      </div>
+    </header>
+
+    <section class="confession-section">
+      <div class="confession-card">
+        <h3 class="confession-card__title" id="letter-title">致我生命中的唯一</h3>
+        <div class="confession-card__body">
+          <p id="typewriter-text" class="confession-card__text"></p>
+          <span class="typewriter-cursor">|</span>
+        </div>
+        <div class="confession-card__footer">
+          <span class="confession-card__date" id="letter-date">2026.05.20</span>
+          <span class="confession-card__sign" id="letter-sign">爱你的 小阳</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 星轨功能中枢导航网格 -->
+    <nav class="hub-dock" id="hub-dock">
+      <div class="hub-dock__header" style="position: relative;">
+        <!-- 🌟 双击感应透明层 -->
+        <div class="longpress-overlay" id="secretKeyholeTrigger" title="快速双击唤醒持印者密钥"></div>
+        <span class="hub-dock__badge">SACRED ARCHIVES</span>
+        <h2 class="hub-dock__title">星轨功能中枢 · 契约秘境</h2>
+      </div>
+      <div class="hub-grid">
+        <div class="hub-btn" data-open-stage="timeline" onclick="if(window.StageManager) window.StageManager.openStage('timeline')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">🪐</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">时光轨迹</span>
+            <span class="hub-btn__desc">雅歌印记 · 3D拍立得</span>
+          </div>
+        </div>
+        <div class="hub-btn" data-open-stage="anniversary" onclick="if(window.StageManager) window.StageManager.openStage('anniversary')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">📅</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">时光刻度</span>
+            <span class="hub-btn__desc">恒久倒数 · 恩典纪念</span>
+          </div>
+        </div>
+        <div class="hub-btn" data-open-stage="icebreaker" onclick="if(window.StageManager) window.StageManager.openStage('icebreaker')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">🕊️</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">破冰和解</span>
+            <span class="hub-btn__desc">情感信号箱 · 避风港</span>
+          </div>
+        </div>
+        <div class="hub-btn" onclick="window.open('checklist.html', '_blank')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">📝</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">同行清单</span>
+            <span class="hub-btn__desc">阶段待办 · 100件心愿</span>
+          </div>
+        </div>
+        <div class="hub-btn" onclick="window.open('diary.html', '_blank')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">📔</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">我们的日记</span>
+            <span class="hub-btn__desc">酸甜苦辣 · 记录生活</span>
+          </div>
+        </div>
+        <div class="hub-btn" data-open-stage="badges" onclick="if(window.StageManager) window.StageManager.openStage('badges')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">🎖️</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">圣约印记</span>
+            <span class="hub-btn__desc">成就徽章 · 荣誉陈列</span>
+          </div>
+        </div>
+        <div class="hub-btn" data-open-stage="scratch" onclick="if(window.StageManager) window.StageManager.openStage('scratch')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">🎟️</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">舍己特权</span>
+            <span class="hub-btn__desc">包容特权券 · 刮刮乐</span>
+          </div>
+        </div>
+        <div class="hub-btn" data-open-stage="poster" onclick="if(window.StageManager) window.StageManager.openStage('poster')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">📸</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">数字永存</span>
+            <span class="hub-btn__desc">超清海报 · 单文件铸造</span>
+          </div>
+        </div>
+        <div class="hub-btn" data-open-stage="birthday" onclick="if(window.StageManager) window.StageManager.openStage('birthday')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">🎂</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">生日盲盒</span>
+            <span class="hub-btn__desc">3D时空贺卡 · 永存</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <footer class="universe-footer">
+      <p class="universe-footer__text">✨ 爱情坚强如死，众水不能熄灭 · 雅歌之印 ✨</p>
+    </footer>
+  </main>
+
+  <!-- 🌟 补齐：后台管理验证控制台模态框 DOM -->
+  <div id="hq-admin-auth-modal" class="hq-auth-modal">
+    <div class="hq-auth-dialog">
+      <div class="hq-auth-icon">⚙️</div>
+      <h3 class="hq-auth-title">雅歌时空控制台</h3>
+      <p class="hq-auth-desc">请输入管理员密钥以进行操作鉴证：</p>
+      <input type="password" id="hq-admin-input" class="hq-auth-input" placeholder="••••••" maxlength="32">
+      <div class="hq-auth-error" id="hq-admin-error"></div>
+      <div class="hq-auth-actions">
+        <button class="hq-btn-cancel" id="hq-admin-cancel">取消</button>
+        <button class="hq-btn-confirm" id="hq-admin-confirm">验证</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="stage-modal-overlay" class="stage-overlay" onclick="if(window.StageManager) window.StageManager.closeStage()"></div>
+  <div id="stage-modal-container" class="stage-container">
+    <section id="stage-badges" class="stage-modal">
+      <div class="stage-modal__header">
+        <div class="stage-modal__title-box">
+          <span class="stage-modal__icon">🎖️</span>
+          <h2 class="stage-modal__title">圣约印记 · 荣誉陈列室</h2>
+        </div>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()" title="返回主界面">✕</button>
+      </div>
+      <div class="stage-modal__body" style="background:#0f172a;">
+        <div class="section-title">
+          <span class="section-title__desc" style="color:#94a3b8;" id="grace-badges-unlocked-count">已解锁 0 / 15 勋章</span>
+        </div>
+        <div class="grace-badge-grid" id="grace-badge-grid-container"></div>
+      </div>
+    </section>
+
+    <section id="stage-timeline" class="stage-modal">
+      <div class="stage-modal__header">
+        <div class="stage-modal__title-box"><span class="stage-modal__icon">🪐</span><h2 class="stage-modal__title">时光轨迹 · 雅歌印记</h2></div>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
+      </div>
+      <div class="stage-modal__body"><div class="section-title"><span class="section-title__desc">点击卡片可 3D 翻转查看独家私语与圣洁承诺</span></div><div class="heart-engine-launch"><button class="heart-engine-btn" id="heartEngineBtn" type="button">💗 3D心形照片引擎</button></div><div class="timeline-flow" id="timeline-flow"></div></div>
+      <div class="heart-engine-overlay" id="heartEngineOverlay" aria-hidden="true">
+        <div class="heart-engine-overlay__inner">
+          <div class="heart-engine-overlay__header">
+            <div class="heart-engine-overlay__title">💗 3D心形照片引擎</div>
+            <button class="heart-engine-overlay__close" id="heartEngineClose" type="button">✕</button>
+          </div>
+          <div class="heart-engine-stage">
+            <div class="heart-engine-scene" id="heartEngineScene"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stage-anniversary" class="stage-modal">
+      <div class="stage-modal__header">
+        <div class="stage-modal__title-box"><span class="stage-modal__icon">📅</span><h2 class="stage-modal__title">时光刻度 · 恒久倒数</h2></div>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
+      </div>
+      <div class="stage-modal__body"><div class="section-title"><span class="section-title__desc">公历阴历智能校准 · 每一天都铭刻着恩典与守望</span></div><div class="anniversary-grid" id="anniversary-container"></div></div>
+    </section>
+
+    <section id="stage-icebreaker" class="stage-modal">
+      <div class="stage-modal__header">
+        <div class="stage-modal__title-box"><span class="stage-modal__icon">🕊️</span><h2 class="stage-modal__title">破冰和解 · 情感信号箱</h2></div>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
+      </div>
+      <div class="stage-modal__body">
+        <div class="section-title"><span class="section-title__desc">爱情不是讲理的地方，而是包容、理解与避风港</span></div>
+        <div class="icebreaker-card">
+          <div class="icebreaker-grid" id="icebreaker-container"></div>
+          <div class="icebreaker-history-wrap">
+            <div class="icebreaker-history-title"><span>💑 我们的破冰与和好印记 (永恒备忘录)</span></div>
+            <div class="icebreaker-history-list" id="icebreaker-history-container"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stage-scratch" class="stage-modal">
+      <div class="stage-modal__header">
+        <div class="stage-modal__title-box"><span class="stage-modal__icon">🎟️</span><h2 class="stage-modal__title" id="scratch-stage-header-title">舍己与包容特权券</h2></div>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
+      </div>
+      <div class="stage-modal__body">
+        <div class="section-title">
+          <h3 class="section-title__text" id="scratch-section-title">恋爱期 · 舍己与包容特权券</h3>
+          <span class="section-title__desc">真实刮开涂层 · 点击核销印章锁定承诺</span>
+        </div>
+        
+        <!-- 🌟 物理级 3D 黑金锁定面板 -->
+        <div id="scratch-guest-lock" style="display:none; text-align:center; padding:48px 24px; background:var(--bg-card, rgba(255,255,255,0.03)); border:1.5px dashed var(--border-card, rgba(255,255,255,0.15)); border-radius:24px; margin:20px auto; max-width:600px; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+          <span style="font-size:48px; display:block; margin-bottom:14px; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.5));">🔒</span>
+          <span style="color:var(--text-hero, #e2e8f0); font-size:18px; font-weight:900; letter-spacing:1px; display:block; margin-bottom:8px;">展览模式：舍己包容特权已锁定</span>
+          <span style="color:var(--text-sub, #94a3b8); font-size:13.5px; line-height:1.6; display:block;">
+            这是属于他们最私密的独家承诺<br>
+            <span style="font-size:12px; margin-top:6px; display:inline-block; opacity:0.8;">※ 仅持印者设备有权限查看详情与核销</span>
+          </span>
+        </div>
+
+        <div class="scratch-grid" id="scratch-container"></div>
+      </div>
+    </section>
+
+    <section id="stage-poster" class="stage-modal">
+      <div class="stage-modal__header">
+        <div class="stage-modal__title-box"><span class="stage-modal__icon">📸</span><h2 class="stage-modal__title">导出超清壁纸与数字资产</h2></div>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
+      </div>
+      <div class="stage-modal__body">
+        <div class="poster-card" style="display:flex; flex-direction:column; gap:14px; max-width:680px; margin:0 auto;">
+          <div class="poster-card__info"><p class="poster-card__desc">基于当前同行天数与时光回忆渲染高清海报，或将全站数据打包为独立 HTML 永久珍藏</p></div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button id="generate-poster-btn" class="btn-universe btn-universe--accent" style="flex:1;"><span>✨ 生成纪念海报</span></button>
+            <button id="export-eternal-btn" class="btn-universe btn-universe--primary" style="flex:1;" onclick="EternalSealExporter.downloadSingleFileArchive()"><span>📦 铸造永恒印记 (单文件)</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stage-birthday" class="stage-modal">
+      <div class="stage-modal__header">
+        <div class="stage-modal__title-box"><span class="stage-modal__icon">🎂</span><h2 class="stage-modal__title">星轨生辰 · 专属盲盒</h2></div>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
+      </div>
+      <div class="stage-modal__body">
+        <div class="section-title"><span class="section-title__desc">时空胶囊已封装，将在特定时刻为你解锁全息 3D 贺卡</span></div>
+        <div id="birthday-capsule-container" class="birthday-container"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="secret-owner-modal" class="hq-auth-modal">
+    <div class="hq-auth-dialog">
+      <div class="hq-auth-icon">🗝️</div>
+      <h3 class="hq-auth-title">持印者设备升权</h3>
+      <p class="hq-auth-desc">请输入管理密码以永久认证此设备。认证后将开放全站高阶书写权限，免去二次验证的繁琐。</p>
+      <input type="password" id="secret-owner-input" class="hq-auth-input" placeholder="••••••" maxlength="32">
+      <div class="hq-auth-actions">
+        <button class="hq-btn-cancel" onclick="document.getElementById('secret-owner-modal').classList.remove('active')">取消</button>
+        <button class="hq-btn-confirm" onclick="verifySecretOwner()">解除封印</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="vinyl-player" id="vinyl-player">
+    <div class="heart-music-capsule" id="heart-music-capsule" title="单击：播放/暂停 | 长按或双击：专属歌单">
+      <div class="heart-music-core">
+        <span class="heart-music-icon">❤️</span>
+        <img id="vinyl-cover" class="heart-music-cover" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'" decoding="async">
+      </div>
+      <div class="heart-music-pulse"></div>
+    </div>
+  </aside>
+
+  <div class="playlist-drawer" id="playlist-drawer">
+    <div class="playlist-drawer__header">
+      <div class="playlist-drawer__title"><span>🎵 专属背景音乐列表</span></div>
+      <button class="playlist-drawer__close" id="playlist-drawer-close">✕</button>
+    </div>
+    <div class="playlist-drawer__list" id="playlist-drawer-list"></div>
+  </div>
+
+  <div class="easter-egg-trigger easter-egg-trigger--star" id="egg-star">⭐</div>
+  <div class="easter-egg-trigger easter-egg-trigger--paw" id="egg-paw">🐾</div>
+
+  <div class="egg-modal" id="egg-modal">
+    <div class="egg-modal__dialog">
+      <div class="egg-modal__body" id="egg-modal-text"></div>
+      <button class="egg-modal__close-btn" id="egg-modal-close">收下心意 💖</button>
+    </div>
+  </div>
+
+  <div class="poster-modal" id="poster-modal">
+    <div class="poster-modal__dialog">
+      <div class="poster-modal__preview-box" id="poster-preview-box"></div>
+      <div class="poster-modal__actions">
+        <p class="poster-modal__tip">长按上方图片或点击下方按钮保存</p>
+        <button class="btn-universe btn-universe--primary" id="download-poster-btn">📥 保存海报至相册</button>
+        <button class="btn-universe btn-universe--secondary" id="close-poster-btn">关闭</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="poster-modal" id="single-poster-modal" style="display:none;">
+    <div class="poster-modal__dialog">
+      <div class="poster-modal__preview-box" id="single-poster-preview-box"></div>
+      <div class="poster-modal__actions">
+        <p class="poster-modal__tip">长按上方图片或点击下方按钮保存</p>
+        <button class="btn-universe btn-universe--primary" id="download-single-poster-btn" onclick="if(window.AnniversaryTools && window.AnniversaryTools.currentPosterDataUrl){ const a=document.createElement('a'); a.download=`契约纪念卡片_${Date.now()}.jpg`; a.href=window.AnniversaryTools.currentPosterDataUrl; a.click(); }">📥 保存海报至相册</button>
+        <button class="btn-universe btn-universe--secondary" onclick="document.getElementById('single-poster-modal').style.display='none';">关闭</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="icebreaker-modal" class="icebreaker-modal">
+    <div class="icebreaker-modal__dialog">
+      <div id="icebreaker-modal-badge" class="icebreaker-modal__badge">SACRED COVENANT</div>
+      <h3 id="icebreaker-modal-title" class="icebreaker-modal__title">愿爱化解一切 · 我们的避风港</h3>
+      <div class="icebreaker-letter"><p id="icebreaker-modal-letter" class="icebreaker-letter__quote"></p></div>
+      <div id="icebreaker-modal-actions" class="icebreaker-modal__actions"></div>
+    </div>
+  </div>
+  
+  <div class="poster-modal" id="icebreaker-poster-modal" style="display:none;">
+    <div class="poster-modal__dialog">
+      <div class="poster-modal__preview-box" id="icebreaker-poster-preview-box"></div>
+      <div class="poster-modal__actions">
+        <p class="poster-modal__tip">长按上方图片或点击下方按钮保存</p>
+        <button class="btn-universe btn-universe--primary" id="download-icebreaker-poster-btn" onclick="if(window.IceBreakerInstance && window.IceBreakerInstance.currentPosterDataUrl){ const a=document.createElement('a'); a.download=`和好圣约纪念_${Date.now()}.jpg`; a.href=window.IceBreakerInstance.currentPosterDataUrl; a.click(); }">📥 保存和好海报至相册</button>
+        <button class="btn-universe btn-universe--secondary" onclick="document.getElementById('icebreaker-poster-modal').style.display='none';">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js?v=2.5"></script>
+  <script src="js/romantic-rose.js?v=2.5"></script>
+  <script src="js/theme-presets.js?v=2.5"></script>
+  <script src="js/stage-content.js?v=2.5"></script>
+  <script src="js/theme-engine.js?v=2.5"></script>
+  <script src="js/anniversary-engine.js?v=2.5"></script>
+  <script src="js/anniversary-tools.js?v=2.5"></script>
+  <script src="js/anniversary.js?v=2.5"></script>
+  <script src="js/icebreaker-actions.js?v=2.5"></script>
+  <script src="js/icebreaker.js?v=2.5"></script>
+  <script src="js/lifecycle.js?v=2.5"></script>
+  <script src="js/photo-wall.js?v=2.5"></script>
+  <script src="js/effects.js?v=2.5"></script>
+  <script src="js/timeline.js?v=2.5"></script>
+  <script src="js/pet-celebration.js?v=2.5"></script>
+  <script src="js/pet.js?v=2.5"></script>
+  <script src="js/export-eternal.js?v=2.5"></script>
+  <script src="js/birthday.js?v=2.6"></script>
+  <script src="js/scratch.js?v=3.7"></script>
+  <script src="js/core.js?v=2.5"></script>
+  
+  <script>
+    function showGuestAlert() {
+      const t = document.getElementById("guestAlertToast");
+      if(t) {
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2500);
+      }
+    }
+
+    function isOwnerDevice() {
+      return !!localStorage.getItem("love_owner_token");
+    }
+
+    function syncOwnerClasses() {
+      if (isOwnerDevice()) {
+        document.documentElement.classList.add("is-owner");
+        document.body.classList.add("is-owner");
+      } else {
+        document.documentElement.classList.remove("is-owner");
+        document.body.classList.remove("is-owner");
+      }
+    }
+
+    async function verifySecretOwner() {
+      const pwd = document.getElementById("secret-owner-input").value.trim();
+      if (!pwd) return;
+      
+      const btn = document.querySelector(".hq-btn-confirm");
+      const origText = btn.textContent;
+      btn.textContent = "鉴证中...";
+      
+      try {
+        const res = await fetch("/api/love/verify-gatekeeper", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pwd })
+        });
+        const data = await res.json();
+        
+        if (data.success && data.memberToken) {
+          localStorage.setItem("love_owner_token", data.memberToken);
+          syncOwnerClasses();
+          document.getElementById("secret-owner-modal").classList.remove("active");
+          showGuestAlert(); 
+          document.getElementById("guestAlertToast").textContent = "✨ 设备鉴证成功，已永久开放核心写权限！";
+          document.getElementById("guestAlertToast").style.background = "rgba(16, 185, 129, 0.95)";
+          setTimeout(() => location.reload(), 1200); 
+        } else {
+          alert("❌ 密钥错误或无权限");
+        }
+      } catch (err) {
+        alert("网络异常");
+      } finally {
+        btn.textContent = origText;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      syncOwnerClasses();
+
+      if (window.RomanticRoseEngine) {
+        window.roseEngineInstance = new window.RomanticRoseEngine();
+        window.roseEngineInstance.init();
+        window.addEventListener("universe:unlocked", () => {
+          if (window.roseEngineInstance) window.roseEngineInstance.destroy();
+        });
+      }
+      if (window.ThemeEngine) window.ThemeEngine.init();
+      if (window.StageManager) window.StageManager.init();
+      if (window.AnniversaryManager && window.LOVE_CONFIG) {
+        const anniMgr = new window.AnniversaryManager(window.LOVE_CONFIG);
+        anniMgr.init();
+      }
+      if (window.IceBreakerManager && window.LOVE_CONFIG) {
+        window.IceBreakerInstance = new window.IceBreakerManager(window.LOVE_CONFIG);
+        window.IceBreakerInstance.init();
+      }
+      if (window.GracePetManager && window.LOVE_CONFIG) {
+        const petMgr = new window.GracePetManager(window.LOVE_CONFIG);
+        petMgr.init();
+      }
+      if (window.BirthdayInstance) {
+        window.BirthdayInstance.init();
+      }
+
+      if (window.ScratchCardManager && window.LOVE_CONFIG) {
+        window.ScratchCardInstance = new window.ScratchCardManager(window.LOVE_CONFIG);
+        window.ScratchCardInstance.init();
+      }
+
+      // 🌟 针对 iPhone 14 Pro 等移动端优化的“双击快速唤醒”引擎
+      const triggerArea = document.getElementById("secretKeyholeTrigger");
+      let lastTapTime = 0;
+      
+      const handleSecretTrigger = (e) => {
+        const currentTime = Date.now();
+        const tapInterval = currentTime - lastTapTime;
+        
+        if (tapInterval < 300 && tapInterval > 0) {
+          if (e.cancelable) e.preventDefault();
+          document.getElementById("secret-owner-input").value = "";
+          document.getElementById("secret-owner-modal").classList.add("active");
+          lastTapTime = 0;
+        } else {
+          lastTapTime = currentTime;
+        }
+      };
+
+      if (triggerArea) {
+        triggerArea.addEventListener("touchend", handleSecretTrigger, { passive: false });
+        triggerArea.addEventListener("click", (e) => {
+          if (e.detail === 2) {
+            document.getElementById("secret-owner-input").value = "";
+            document.getElementById("secret-owner-modal").classList.add("active");
+          }
+        });
+        triggerArea.addEventListener("contextmenu", (e) => e.preventDefault());
+      }
+    });
+  </script>
+</body>
+</html>

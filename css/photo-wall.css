@@ -1,0 +1,205 @@
+/**
+ * 众水不灭 · 雅歌之印
+ * 文件名: css/photo-wall.css
+ * 作用: 全景流式视差照片墙样式 (包含真正的全屏 3D 逃逸引擎)
+ */
+
+.parallax-photo-wall {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh; 
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  contain: strict; 
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.wall-polaroid-avatar {
+  position: absolute;
+  top: 24px;
+  left: 20px;
+  width: 110px;
+  background: #ffffff;
+  padding: 6px 6px 16px 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), 0 0 15px rgba(245, 158, 11, 0.25);
+  border-radius: 6px;
+  opacity: 1 !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  z-index: 20;
+  pointer-events: auto;
+  cursor: pointer;
+  contain: paint layout;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.wall-polaroid-avatar:hover {
+  transform: scale(1.06) translateZ(0) !important;
+  -webkit-transform: scale(1.06) translateZ(0) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 22px rgba(244, 63, 94, 0.4);
+}
+
+.wall-polaroid-avatar .wall-polaroid-inner {
+  width: 100%; height: 98px; overflow: hidden; border-radius: 4px; background: #0f172a; position: relative;
+}
+.wall-polaroid-avatar .wall-polaroid-inner img {
+  width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: -webkit-optimize-contrast;
+}
+.wall-polaroid-avatar .wall-polaroid-caption {
+  font-size: 10px; font-weight: 800; text-align: center; color: #334155; margin-top: 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.5px;
+}
+
+.wall-polaroid-item {
+  position: absolute; width: 120px; background: #ffffff; padding: 8px 8px 22px 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22); border-radius: 4px; opacity: 0; 
+  will-change: transform, opacity; pointer-events: none; contain: paint layout;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wall-polaroid-inner { width: 100%; height: 110px; overflow: hidden; border-radius: 2px; background: #0f172a; position: relative; }
+.wall-polaroid-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@media (min-width: 1024px) {
+  .wall-polaroid-avatar { top: 32px; left: 36px; width: 135px; padding: 8px 8px 20px 8px; }
+  .wall-polaroid-avatar .wall-polaroid-inner { height: 120px; }
+  .wall-polaroid-item { width: 145px; padding: 10px 10px 26px 10px; }
+  .wall-polaroid-inner { height: 130px; }
+}
+
+@media (max-width: 640px) {
+  .wall-polaroid-avatar {
+    top: max(10px, env(safe-area-inset-top, 10px)); left: 10px; width: 78px;
+    padding: 4px 4px 8px 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .wall-polaroid-avatar .wall-polaroid-inner { height: 70px; }
+  .wall-polaroid-avatar .wall-polaroid-caption { font-size: 9px; margin-top: 3px; }
+  .wall-polaroid-item { width: 78px; padding: 4px 4px 12px 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+  .wall-polaroid-inner { height: 70px; }
+}
+
+/* ==========================================================
+   🌟 3D 全息心形宇宙特供视觉 (彻底全屏逃逸架构)
+   ========================================================== */
+
+.heart-engine-overlay {
+  position: fixed; inset: 0; z-index: 999999;
+  background: radial-gradient(ellipse at center, rgba(15, 23, 42, 1) 0%, rgba(3, 7, 18, 1) 100%);
+  opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s ease;
+}
+.heart-engine-overlay--open { opacity: 1; visibility: visible; }
+.heart-engine-overlay__inner { width: 100%; height: 100%; display: block; position: relative; }
+
+.heart-engine-overlay__header {
+  position: absolute;
+  top: max(20px, env(safe-area-inset-top, 20px));
+  left: 20px;
+  right: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 100; pointer-events: none; 
+}
+.heart-engine-overlay__title { 
+  color: #fbcfe8; font-size: 16px; font-weight: 800; letter-spacing: 1px; 
+  pointer-events: auto; text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+.heart-engine-overlay__close {
+  background: rgba(255, 255, 255, .15); color: #fff; border: 1px solid rgba(255,255,255,0.2);
+  width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer;
+  pointer-events: auto; backdrop-filter: blur(8px);
+}
+.heart-engine-overlay__close:hover { background: rgba(244, 63, 94, 0.8); border-color: #f43f5e; }
+
+/* 氛围光晕 */
+.ambient-light-top {
+  position: absolute; top: -15vh; left: 50%; transform: translateX(-50%);
+  width: 80vw; height: 40vh; max-width: 800px;
+  background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.12), transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+.ambient-light-bottom {
+  position: absolute; bottom: -20vh; left: 50%; transform: translateX(-50%);
+  width: 80vw; height: 50vh; max-width: 800px;
+  background: radial-gradient(ellipse at center, rgba(244, 63, 94, 0.18), transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+/* 纯净的点阵心形与流星 */
+.particle-universe {
+  position: absolute; inset: 0;
+  z-index: 0; pointer-events: none; overflow: hidden;
+}
+.constellation-shape {
+  position: absolute; will-change: transform, opacity;
+  animation: twinkle ease-in-out infinite alternate, drift linear infinite;
+}
+.constellation-shape svg {
+  width: 100%; height: 100%; overflow: visible;
+  filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 6px currentColor);
+}
+@keyframes twinkle { 0% { opacity: 0.25; transform: scale(0.9); } 100% { opacity: 0.9; transform: scale(1.1); } }
+@keyframes drift { 0% { transform: translate3d(0, 0, 0) rotate(0deg); } 100% { transform: translate3d(20px, -40px, 0) rotate(15deg); } }
+
+.meteor {
+  position: absolute; width: 1.5px;
+  background: linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 100%);
+  will-change: transform, opacity; opacity: 0; animation: meteorShower infinite ease-in;
+}
+.meteor::after {
+  content: ''; position: absolute; bottom: -2px; left: -1.5px; width: 4px; height: 4px;
+  background: #ffffff; border-radius: 50%; box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.9), 0 0 20px 4px rgba(56, 189, 248, 0.6);
+}
+@keyframes meteorShower {
+  0% { transform: rotate(45deg) translateY(-300px); opacity: 0; }
+  5% { opacity: 1; }
+  25% { transform: rotate(45deg) translateY(1800px); opacity: 0; }
+  100% { transform: rotate(45deg) translateY(1800px); opacity: 0; }
+}
+
+/* 🌟 高定 3D 相册卡片舞台 (占据绝对全屏) */
+.heart-engine-stage {
+  position: absolute; inset: 0;
+  overflow: hidden; perspective: 1300px; touch-action: pan-y; cursor: grab; 
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+}
+.heart-engine-stage:active { cursor: grabbing; }
+
+.heart-photo-card {
+  position: absolute; 
+  /* 🌟 核心：强行将其压在左上角原点，后续通过 JS 的 transform(-50%,-50%) 回正中心 */
+  top: 0; left: 0;
+  width: 150px; height: 210px; border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); overflow: hidden;
+  transform: translate3d(0, 0, 0); 
+  will-change: transform, filter, opacity, z-index;
+  user-select: none; -webkit-user-drag: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.heart-photo-card img {
+  width: 100%; height: 100%; object-fit: cover; pointer-events: none;
+  filter: brightness(0.7) contrast(1.1); transition: filter 0.4s ease;
+}
+
+.photo-glare {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 45%);
+  opacity: 0; transition: opacity 0.4s ease; pointer-events: none; z-index: 2;
+}
+
+/* C 位光影反馈 */
+.heart-photo-card.c-position {
+  border: 1.5px solid rgba(253, 230, 138, 0.9);
+  box-shadow: 0 30px 60px rgba(244, 63, 94, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.4);
+}
+.heart-photo-card.c-position img { filter: brightness(1.1) contrast(1.05) !important; }
+.heart-photo-card.c-position .photo-glare { opacity: 1; }
+
+@media (max-width: 640px) {
+  .heart-photo-card { width: 110px; height: 154px; border-radius: 12px; }
+}

@@ -1,0 +1,318 @@
+/**
+ * 众水不灭 · 雅歌之印
+ * 文件名: css/themes.css
+ * 作用: 12 款男女高奢主题变量定义与浅色系/深色系高饱和自适应对比度
+ */
+
+:root {
+  --bg-primary: #090d16;
+  --theme-bg-gradient: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 45%, #070a14 100%);
+  --bg-card: rgba(15, 23, 42, 0.75);
+  --border-card: rgba(245, 158, 11, 0.35);
+  --card-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  
+  --text-hero: #ffffff;
+  --text-hero-gradient: linear-gradient(135deg, #ffffff 0%, #fecdd3 50%, #fb7185 100%);
+  --text-hero-shadow: 0 0 30px rgba(251, 113, 133, 0.4), 0 2px 8px rgba(0, 0, 0, 0.8);
+  --text-subtitle: #cbd5e1;
+  --text-main: #f8fafc;
+  --text-sub: #94a3b8;
+  --text-muted: #64748b;
+  --accent-gold: #f59e0b;
+  --accent-gold-glow: rgba(245, 158, 11, 0.4);
+
+  /* 深色模式徽章基础变量 */
+  --badge-bg: rgba(245, 158, 11, 0.12);
+  --badge-border: rgba(245, 158, 11, 0.35);
+  --badge-text: #fde68a;
+
+  /* 深色模式计时器基础变量 (毛玻璃底色) */
+  --timer-unit-bg: rgba(15, 23, 42, 0.45);
+  --timer-unit-border: rgba(255, 255, 255, 0.12);
+  --timer-num-color: #fde68a;
+  --timer-label-color: #cbd5e1;
+  --timer-milestone-bg: rgba(251, 113, 133, 0.12);
+  --timer-milestone-border: rgba(251, 113, 133, 0.35);
+  --timer-milestone-text: #fb7185;
+
+  --confession-bg: rgba(255, 253, 245, 0.96);
+  --confession-border: rgba(254, 205, 211, 0.6);
+  --confession-title: #9f1239;
+  --confession-text: #374151;
+  --confession-footer: #881337;
+
+  --drawer-bg: rgba(15, 23, 42, 0.94);
+  --drawer-border: rgba(245, 158, 11, 0.4);
+  --drawer-item-bg: rgba(255, 255, 255, 0.05);
+  --drawer-item-border: rgba(255, 255, 255, 0.08);
+  --drawer-item-title: #ffffff;
+  --drawer-item-artist: #94a3b8;
+  --drawer-active-bg: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(217, 119, 6, 0.2) 100%);
+  --drawer-active-border: #f59e0b;
+  --drawer-active-title: #fde68a;
+}
+
+html, body, .universe-body {
+  background-color: var(--bg-primary, #090d16) !important;
+  transition: background-color 0.4s ease;
+}
+
+.universe-bg-layer {
+  position: fixed; inset: 0; z-index: -999;
+  background-color: var(--bg-primary, #090d16);
+  background-image: var(--theme-bg-gradient);
+  background-size: cover; background-position: center center; background-repeat: no-repeat;
+  transition: background-color 0.4s ease, background-image 0.4s ease;
+}
+
+/* ================= 👦 男生 6 套深色主题 ================= */
+body.theme-sunset-twilight {
+  --bg-primary: #090d16;
+  --theme-bg-gradient: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 45%, #070a14 100%);
+  --bg-card: rgba(19, 26, 41, 0.8);
+  --border-card: rgba(245, 158, 11, 0.35);
+  --text-main: #ffffff;
+  --text-sub: #94a3b8;
+  --accent-gold: #f59e0b;
+}
+
+body.theme-cyber-space {
+  --bg-primary: #030712;
+  --theme-bg-gradient: radial-gradient(circle at 50% 20%, #064e3b 0%, #022c22 50%, #030712 100%);
+  --bg-card: rgba(6, 78, 59, 0.45);
+  --border-card: rgba(52, 211, 153, 0.45);
+  --text-main: #ecfdf5;
+  --text-sub: #6ee7b7;
+  --accent-gold: #10b981;
+}
+
+body.theme-firefly-forest {
+  --bg-primary: #020617;
+  --theme-bg-gradient: radial-gradient(circle at 50% 20%, #064e3b 0%, #052e16 50%, #020617 100%);
+  --bg-card: rgba(6, 78, 59, 0.5);
+  --border-card: rgba(110, 231, 183, 0.4);
+  --text-main: #f0fdf4;
+  --text-sub: #86efac;
+  --accent-gold: #22c55e;
+}
+
+body.theme-warm-ember {
+  --bg-primary: #050101;
+  --theme-bg-gradient: radial-gradient(circle at 50% 20%, #450a0a 0%, #1c0404 50%, #050101 100%);
+  --bg-card: rgba(69, 10, 10, 0.55);
+  --border-card: rgba(248, 113, 113, 0.4);
+  --text-main: #fef2f2;
+  --text-sub: #fca5a5;
+  --accent-gold: #ef4444;
+}
+
+body.theme-deep-ocean {
+  --bg-primary: #020617;
+  --theme-bg-gradient: radial-gradient(circle at 50% 20%, #0c4a6e 0%, #082f49 50%, #020617 100%);
+  --bg-card: rgba(8, 47, 73, 0.55);
+  --border-card: rgba(56, 189, 248, 0.4);
+  --text-main: #f0f9ff;
+  --text-sub: #7dd3fc;
+  --accent-gold: #0ea5e9;
+}
+
+body.theme-aurora-night {
+  --bg-primary: #090d16;
+  --theme-bg-gradient: radial-gradient(circle at 50% 20%, #3b0764 0%, #1e1b4b 50%, #090d16 100%);
+  --bg-card: rgba(59, 7, 100, 0.45);
+  --border-card: rgba(192, 132, 252, 0.4);
+  --text-main: #faf5ff;
+  --text-sub: #d8b4fe;
+  --accent-gold: #a855f7;
+}
+
+/* ================= 👧 女生 6 套浅色唯美高饱和高对比度主题 ================= */
+body.theme-french-cream {
+  --bg-primary: #f7eee4;
+  --theme-bg-gradient: linear-gradient(180deg, #fdfbf7 0%, #f7eee4 40%, #eddcd0 100%);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-card: rgba(120, 53, 15, 0.35);
+  --card-shadow: 0 16px 36px rgba(120, 53, 15, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --text-hero: #451a03;
+  --text-hero-gradient: linear-gradient(135deg, #451a03 0%, #78350f 45%, #9a3412 100%);
+  --text-hero-shadow: none;
+  --text-subtitle: #78350f;
+  --text-main: #451a03;
+  --text-sub: #78350f;
+  --text-muted: #92400e;
+  --accent-gold: #b45309;
+}
+
+body.theme-sakura-romance {
+  --bg-primary: #fce7f3;
+  --theme-bg-gradient: linear-gradient(180deg, #fff1f2 0%, #fce7f3 45%, #fbcfe8 100%);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-card: rgba(225, 29, 72, 0.35);
+  --text-hero: #881337;
+  --text-hero-gradient: linear-gradient(135deg, #881337 0%, #be123c 50%, #e11d48 100%);
+  --text-subtitle: #9f1239;
+  --text-main: #881337;
+  --text-sub: #9f1239;
+  --accent-gold: #e11d48;
+}
+
+body.theme-monet-garden {
+  --bg-primary: #dcfce7;
+  --theme-bg-gradient: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 45%, #bbf7d0 100%);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-card: rgba(22, 101, 52, 0.35);
+  --text-hero: #14532d;
+  --text-hero-gradient: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
+  --text-subtitle: #166534;
+  --text-main: #14532d;
+  --text-sub: #166534;
+  --accent-gold: #15803d;
+}
+
+body.theme-morning-dew {
+  --bg-primary: #f1f5f9;
+  --theme-bg-gradient: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 45%, #e2e8f0 100%);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-card: rgba(71, 85, 105, 0.35);
+  --text-hero: #0f172a;
+  --text-hero-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  --text-subtitle: #1e293b;
+  --text-main: #0f172a;
+  --text-sub: #334155;
+  --accent-gold: #d97706;
+}
+
+body.theme-sunset-blush {
+  --bg-primary: #f3e8ff;
+  --theme-bg-gradient: linear-gradient(180deg, #faf5ff 0%, #f3e8ff 45%, #e9d5ff 100%);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-card: rgba(147, 51, 234, 0.35);
+  --text-hero: #581c87;
+  --text-hero-gradient: linear-gradient(135deg, #581c87 0%, #7e22ce 50%, #c026d3 100%);
+  --text-subtitle: #6b21a8;
+  --text-main: #581c87;
+  --text-sub: #6b21a8;
+  --accent-gold: #9333ea;
+}
+
+body.theme-orange-sea {
+  --bg-primary: #ffedd5;
+  --theme-bg-gradient: linear-gradient(180deg, #fff7ed 0%, #ffedd5 45%, #fed7aa 100%);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-card: rgba(234, 88, 12, 0.35);
+  --text-hero: #7c2d12;
+  --text-hero-gradient: linear-gradient(135deg, #7c2d12 0%, #c2410c 50%, #ea580c 100%);
+  --text-subtitle: #9a3412;
+  --text-main: #7c2d12;
+  --text-sub: #9a3412;
+  --accent-gold: #ea580c;
+}
+
+/* ================= 🌟 浅色模式全站高饱和度穿透兜底 ================= */
+body[data-theme-type="light"] {
+  --drawer-bg: rgba(255, 255, 255, 0.96);
+  --drawer-border: rgba(244, 63, 94, 0.35);
+  --drawer-item-bg: rgba(0, 0, 0, 0.03);
+  --drawer-item-border: rgba(0, 0, 0, 0.06);
+  --drawer-item-title: var(--text-main);
+  --drawer-item-artist: var(--text-sub);
+  --drawer-active-bg: linear-gradient(135deg, rgba(254, 205, 211, 0.6) 0%, rgba(253, 230, 138, 0.5) 100%);
+  --drawer-active-border: #f43f5e;
+  --drawer-active-title: #881337;
+
+  --badge-bg: rgba(255, 255, 255, 0.85);
+  --badge-border: rgba(244, 63, 94, 0.45);
+  --badge-text: #e11d48;
+  
+  --timer-unit-bg: rgba(255, 255, 255, 0.55);
+  --timer-unit-border: rgba(255, 255, 255, 0.9);
+  --timer-num-color: var(--text-main); 
+  --timer-label-color: var(--text-sub);
+}
+
+body[data-theme-type="light"] .hub-dock__title {
+  color: #451a03 !important;
+  font-weight: 900 !important;
+  text-shadow: none !important;
+}
+
+/* 契约标题深度穿透 (去除模糊阴影，改为硬朗高对比阴影) */
+body[data-theme-type="light"] .hero-section__names,
+body.theme-french-cream .hero-section__names,
+body.theme-sakura-romance .hero-section__names,
+body.theme-monet-garden .hero-section__names,
+body.theme-morning-dew .hero-section__names,
+body.theme-sunset-blush .hero-section__names,
+body.theme-orange-sea .hero-section__names {
+  font-family: "Songti SC", "STSong", "Noto Serif SC", serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  background: var(--text-hero-gradient) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08)) !important;
+}
+
+body[data-theme-type="light"] .name-connector {
+  background: linear-gradient(135deg, #d97706 0%, #ea580c 50%, #e11d48 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08)) !important;
+}
+
+body[data-theme-type="light"] .hero-section__subtitle {
+  color: var(--text-subtitle) !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+  opacity: 0.96 !important;
+  letter-spacing: 0.6px !important;
+}
+
+/* 计时器玻璃拟态深度接管 */
+.hero-section__badge {
+  background: var(--badge-bg) !important;
+  border: 1px solid var(--badge-border) !important;
+  color: var(--badge-text) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  padding: 6px 20px !important;
+  border-radius: 50px !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.love-timer__unit {
+  background: var(--timer-unit-bg) !important;
+  border: 1px solid var(--timer-unit-border) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 72px !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.love-timer__num {
+  color: var(--timer-num-color) !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  transition: color 0.4s ease !important;
+}
+
+.love-timer__label {
+  color: var(--timer-label-color) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  margin-top: 4px !important;
+  transition: color 0.4s ease !important;
+}

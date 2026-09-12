@@ -1,0 +1,157 @@
+/**
+ * ====================================================================
+ * 恋爱时光轴 & 漫游宇宙 (Love Universe)
+ * 文件名: css/animations.css
+ * 作用: 密码错误剧烈震颤、开箱展开、黑胶旋转、印章砰击与光效动效
+ * ====================================================================
+ */
+
+/* ================= 1. 密码输入错误剧烈左右震颤 (Shake) ================= */
+@keyframes shakeError {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  15%, 45%, 75% {
+    transform: translateX(-10px) rotate(-1deg);
+  }
+  30%, 60%, 90% {
+    transform: translateX(10px) rotate(1deg);
+  }
+}
+
+.gatekeeper__dialog--error {
+  animation: shakeError 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  border-color: var(--primary-pink) !important;
+}
+
+/* ================= 2. 门禁解锁成功全屏渐隐展开 (Unlock Fade) ================= */
+@keyframes gatekeeperUnlock {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+    filter: blur(12px);
+    visibility: hidden;
+  }
+}
+
+.gatekeeper--unlocking {
+  animation: gatekeeperUnlock 0.8s var(--ease-spring) forwards;
+}
+
+/* ================= 3. 黑胶唱片 360° 匀速旋转 ================= */
+@keyframes discRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vinyl-player__disc--spinning {
+  animation: discRotate 8s linear infinite;
+}
+
+/* ================= 4. 拟真印章重重盖下 (Stamp Slam) ================= */
+@keyframes stampSlam {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(25deg) scale(3);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(0.9);
+  }
+  85% {
+    transform: translate(-50%, -50%) rotate(-13deg) scale(1.05);
+  }
+  100% {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1);
+  }
+}
+
+.scratch-stamp--slam {
+  animation: stampSlam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ================= 5. 爱心跳动 (Heartbeat Pulse) ================= */
+@keyframes heartPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.2);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.28);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+.heartbeat-icon {
+  display: inline-block;
+  animation: heartPulse 1.8s ease-in-out infinite;
+}
+
+/* ================= 6. 金属流光渐变 (Shimmer) ================= */
+@keyframes shimmerFoil {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    #fde68a 25%,
+    #fb7185 50%,
+    rgba(255, 255, 255, 0.8) 75%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerFoil 4s linear infinite;
+}
+
+/* ================= 7. 悬浮微晃动 (Floating Breath) ================= */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.easter-egg-trigger {
+  animation: floatSlow 3s ease-in-out infinite;
+}
+
+/* ================= 8. 打字机光标闪烁 ================= */
+@keyframes cursorBlink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}

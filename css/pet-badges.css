@@ -1,0 +1,295 @@
+/**
+ * 众水不灭 · 雅歌之印
+ * 文件名: css/pet-badges.css
+ * 作用: 5 阶 12 徽章网格陈列室、加冕光环脉动、解锁高光与独立高层级庆贺弹窗样式
+ */
+
+/* ================= 1. 灵宠弹窗内徽章陈列网格 ================= */
+.grace-badges-section {
+  background: rgba(3, 7, 18, 0.6);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 18px;
+  padding: 16px 14px;
+  margin-bottom: 18px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.grace-badges-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.grace-badges-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #fde68a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.5px;
+}
+
+.grace-badges-count {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent-gold, #f59e0b);
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.grace-badge-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* 徽章卡片单体 */
+.grace-badge-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  contain: layout paint;
+}
+
+.grace-badge-card:hover {
+  transform: translateY(-3px) scale(1.04);
+}
+
+/* 已解锁高光态 */
+.grace-badge-card.unlocked {
+  background: radial-gradient(circle at 50% 30%, rgba(245, 158, 11, 0.25) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border-color: #f59e0b;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 14px rgba(245, 158, 11, 0.3);
+}
+
+.grace-badge-card.unlocked .grace-badge-icon {
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.7));
+  animation: badgeFloating 3s ease-in-out infinite alternate;
+}
+
+/* 未解锁置灰锁定态 */
+.grace-badge-card.locked {
+  filter: grayscale(100%);
+  opacity: 0.42;
+  border-style: dashed;
+}
+
+.grace-badge-icon {
+  font-size: 26px;
+  line-height: 1.1;
+  margin-bottom: 4px;
+  transition: transform 0.25s ease;
+}
+
+.grace-badge-name {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.grace-badge-card.unlocked .grace-badge-name {
+  color: #fde68a;
+}
+
+.grace-badge-desc-tip {
+  font-size: 9px;
+  color: #94a3b8;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+@keyframes badgeFloating {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(-4px) rotate(3deg); }
+}
+
+/* ================= 2. 独立高层级（z-index: 62000）徽章加冕盛典弹窗 ================= */
+.grace-celebration-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 62000;
+  background: rgba(3, 7, 18, 0.86);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+}
+
+.grace-celebration-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.grace-celebration-dialog {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 60%, #030712 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 30px;
+  padding: 32px 24px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 50px rgba(245, 158, 11, 0.45);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transform: scale(0.85) translateY(30px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.grace-celebration-modal.active .grace-celebration-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.grace-celebration-glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.4) 0%, transparent 70%);
+  pointer-events: none;
+  animation: glowPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes glowPulse {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.6; }
+  50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+}
+
+.grace-celebration-tag {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 3px 14px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.grace-celebration-avatar {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fef08a, #f59e0b 60%, #b45309 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 46px;
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.8);
+  animation: avatarPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes avatarPop {
+  0% { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.grace-celebration-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.grace-celebration-subtitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fde68a;
+  margin-bottom: 12px;
+}
+
+.grace-celebration-desc {
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.6;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 22px;
+}
+
+.grace-celebration-btn {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+  cursor: pointer;
+  transition: all 0.25s var(--ease-spring);
+}
+
+.grace-celebration-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(245, 158, 11, 0.6);
+}
+
+.grace-celebration-btn:active {
+  transform: translateY(1px);
+}
+
+/* ================= 3. 移动端响应式优化 ================= */
+@media (max-width: 640px) {
+  .grace-badge-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .grace-badge-card {
+    padding: 8px 3px;
+    border-radius: 14px;
+  }
+  .grace-badge-icon {
+    font-size: 22px;
+  }
+  .grace-badge-name {
+    font-size: 10px;
+  }
+  .grace-celebration-dialog {
+    padding: 26px 18px;
+    border-radius: 24px;
+  }
+  .grace-celebration-avatar {
+    width: 76px;
+    height: 76px;
+    font-size: 38px;
+  }
+  .grace-celebration-title {
+    font-size: 19px;
+  }
+}

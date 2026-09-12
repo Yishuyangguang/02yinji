@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>雅歌之印 · 恩典使者空间</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕊️</text></svg>">
+  
+  <!-- 🎯 修复1: 引入全局主题引擎 CSS -->
+  <link rel="stylesheet" href="css/themes.css?v=2.5">
+
+  <!-- 🎯 修复2: 引入主题拦截器，实现男生/女生主题色自适应 -->
+  <script>
+    (function() {
+      const themeId = localStorage.getItem("love_current_theme_id") || "sunset-twilight";
+      const perspective = localStorage.getItem("love_user_perspective") || "boy";
+      const themeType = (perspective === "girl" || themeId.includes("cream") || themeId.includes("sakura") || themeId.includes("monet") || themeId.includes("dew") || themeId.includes("blush") || themeId.includes("orange")) ? "light" : "dark";
+      
+      document.documentElement.setAttribute("data-theme-type", themeType);
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.classList.add(`theme-${themeId}`);
+        document.body.setAttribute("data-theme-type", themeType);
+
+        // 如果用户上传了自定义壁纸，同步铺设
+        const customBg = localStorage.getItem("love_current_custom_bg");
+        if (customBg) {
+          const bgEl = document.getElementById("universe-bg-layer");
+          if (bgEl) {
+            const scrim = themeType === "light" 
+              ? "linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4))"
+              : "linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45))";
+            bgEl.style.backgroundImage = `${scrim}, url('${customBg}')`;
+          }
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 4px; }
+
+    /* 全局背景图注入层 */
+    .universe-bg-layer {
+      position: fixed; inset: 0; z-index: -1;
+      background: var(--bg-primary, #0f172a);
+      background-size: cover; background-position: center;
+      transition: background 0.5s;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+      /* 🎯 修复3: 移除硬编码深色，全面接管为主题变量 */
+      color: var(--text-main, #f8fafc);
+      background: transparent; 
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 14px 40px;
+      transition: color 0.3s;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
+    }
+
+    /* 顶部导航 */
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .back-btn {
+      background: var(--bg-overlay, rgba(255,255,255,0.1));
+      border: 1px solid var(--border-card, rgba(255,255,255,0.15));
+      color: var(--text-main, #fff);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+    }
+    .page-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-hero, #e2e8f0);
+      letter-spacing: 1px;
+    }
+
+    /* 灵宠视觉中枢 */
+    .pet-hero {
+      background: var(--bg-card, rgba(30, 41, 59, 0.75));
+      border: 1px solid var(--border-card, rgba(56, 189, 248, 0.2));
+      border-radius: 24px;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: var(--card-shadow, 0 10px 30px rgba(0,0,0,0.3));
+      backdrop-filter: blur(16px);
+      text-align: center;
+    }
+    .pet-avatar-wrap {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #fde68a 0%, #f59e0b 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 45px;
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.4);
+      margin-bottom: 16px;
+      animation: floatBreath 3s ease-in-out infinite;
+    }
+    @keyframes floatBreath {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); box-shadow: 0 10px 45px rgba(245, 158, 11, 0.6); }
+    }
+    .pet-tier-pill {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: var(--accent-gold, #fbbf24);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .pet-name { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
+    .pet-desc { font-size: 13px; color: var(--text-sub, #94a3b8); }
+
+    /* 进度条与四大数据网格 */
+    .progress-box { width: 100%; margin-top: 24px; }
+    .progress-meta { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--text-sub, #cbd5e1); margin-bottom: 8px; }
+    .progress-bar-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.2); border-radius: 5px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #f59e0b, #f43f5e); border-radius: 5px; transition: width 0.8s ease; }
+
+    /* 🎯 修复4: 大数字防溢出，开启移动端 2x2 矩阵保护 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-top: 24px;
+    }
+    .stat-card {
+      background: var(--bg-overlay, rgba(0,0,0,0.15));
+      border: 1px solid var(--border-card, rgba(255,255,255,0.05));
+      border-radius: 16px;
+      padding: 12px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .stat-val { font-size: 18px; font-weight: 900; margin-bottom: 4px; white-space: nowrap; }
+    .stat-lbl { font-size: 11px; color: var(--text-sub, #94a3b8); }
+
+    /* 🎯 数据色彩自适应 (黑夜与白昼自动校准对比度) */
+    .val-glow { color: var(--accent-gold, #f59e0b); }
+    .val-streak { color: #fbbf24; }
+    .val-grace { color: #38bdf8; }
+    .val-sacrifice { color: #fb7185; }
+    
+    [data-theme-type="light"] .val-streak { color: #ea580c; }
+    [data-theme-type="light"] .val-grace { color: #0284c7; }
+    [data-theme-type="light"] .val-sacrifice { color: #e11d48; }
+
+    /* 移动端强力劫持: 2x2 田字格避免破版 */
+    @media (max-width: 640px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .stat-card { padding: 14px 10px; }
+      .stat-val { font-size: 20px; } /* 空间变大，数字可以更醒目 */
+    }
+
+    /* 喂养输入操作区 */
+    .action-panel {
+      background: var(--bg-card, rgba(30, 41, 59, 0.75));
+      border: 1px solid var(--border-card, rgba(56, 189, 248, 0.2));
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--card-shadow, 0 8px 24px rgba(0,0,0,0.2));
+    }
+    .action-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .action-title { font-size: 16px; font-weight: 800; color: var(--accent-gold, #38bdf8); display: flex; align-items: center; gap: 8px; }
+    .streak-tag { background: rgba(245, 158, 11, 0.15); color: var(--accent-gold, #fbbf24); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; border: 1px solid rgba(245, 158, 11, 0.3); }
+    
+    .grace-textarea {
+      width: 100%;
+      background: var(--bg-overlay, rgba(0,0,0,0.2));
+      border: 1px solid var(--border-card, rgba(255,255,255,0.1));
+      border-radius: 16px;
+      padding: 16px;
+      color: var(--text-main, #f8fafc);
+      font-size: 15px;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      min-height: 120px;
+      margin-bottom: 16px;
+      transition: all 0.3s;
+    }
+    .grace-textarea:focus { border-color: var(--accent-gold, #38bdf8); background: var(--bg-card-hover, rgba(0,0,0,0.3)); }
+    .grace-textarea::placeholder { color: var(--text-sub, #475569); }
+
+    .feed-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+    .feed-btn:active { transform: scale(0.98); }
+    
+    .sacrifice-btn {
+      width: 100%;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: #fb7185;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    [data-theme-type="light"] .sacrifice-btn {
+      color: #e11d48;
+      background: rgba(225, 29, 72, 0.1);
+    }
+    .sacrifice-btn:active { transform: scale(0.98); }
+
+    /* 历史日志区 */
+    .logs-panel { margin-top: 10px; }
+    .logs-title { font-size: 14px; font-weight: 800; color: var(--text-sub, #64748b); margin-bottom: 16px; }
+    .grace-log-list { display: flex; flex-direction: column; gap: 12px; }
+    .grace-log-item {
+      background: var(--bg-card, rgba(30, 41, 59, 0.5));
+      border-left: 3px solid var(--accent-gold, #f59e0b);
+      padding: 14px 16px;
+      border-radius: 0 12px 12px 0;
+      font-size: 14px;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: var(--text-main, #f8fafc);
+    }
+    .grace-log-item span { font-size: 11px; color: var(--text-sub, #64748b); font-weight: 600; }
+
+    /* 纯代码轻量吐司与庆典弹窗 */
+    .toast-msg {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: var(--bg-card, rgba(255, 255, 255, 0.95)); 
+      color: var(--text-main, #0f172a); 
+      border: 1px solid var(--border-card);
+      padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; font-weight: 800; box-shadow: var(--card-shadow, 0 12px 32px rgba(0, 0, 0, 0.3));
+      z-index: 60000; opacity: 0; pointer-events: none; transition: all 0.3s;
+    }
+    .toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* 庆贺弹窗 */
+    .grace-celebration-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 99999; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+    .grace-celebration-modal.active { opacity: 1; pointer-events: auto; }
+    .grace-celebration-dialog { background: var(--bg-card, linear-gradient(180deg, #1e293b 0%, #0f172a 100%)); border: 1px solid var(--border-card, rgba(245, 158, 11, 0.3)); border-radius: 30px; width: 90%; max-width: 400px; padding: 40px 24px; text-align: center; position: relative; overflow: hidden; transform: scale(0.9) translateY(20px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .grace-celebration-modal.active .grace-celebration-dialog { transform: scale(1) translateY(0); }
+    .grace-celebration-glow { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 200px; height: 200px; background: rgba(245, 158, 11, 0.3); filter: blur(60px); border-radius: 50%; pointer-events: none; }
+    .grace-celebration-tag { display: inline-block; background: rgba(245, 158, 11, 0.2); color: var(--accent-gold, #fbbf24); font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; letter-spacing: 1px; margin-bottom: 20px; }
+    .grace-celebration-avatar { font-size: 70px; line-height: 1; margin-bottom: 20px; text-shadow: 0 10px 30px rgba(245, 158, 11, 0.5); }
+    .grace-celebration-title { font-size: 22px; font-weight: 900; color: var(--text-hero, #fff); margin-bottom: 8px; }
+    .grace-celebration-subtitle { font-size: 14px; color: #38bdf8; font-weight: 700; margin-bottom: 16px; }
+    .grace-celebration-desc { font-size: 13px; color: var(--text-sub, #94a3b8); line-height: 1.6; margin-bottom: 30px; }
+    .grace-celebration-btn { background: var(--text-main, #f8fafc); color: var(--bg-card, #0f172a); border: none; padding: 14px 30px; border-radius: 20px; font-size: 15px; font-weight: 900; cursor: pointer; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+
+  <!-- 动态全景背景注入层 -->
+  <div id="universe-bg-layer" class="universe-bg-layer"></div>
+
+  <div id="toastMsg" class="toast-msg">✓ 操作成功</div>
+
+  <div class="container">
+    <header class="top-header">
+      <a href="index.html" class="back-btn">➔ 返回星轨</a>
+      <span class="page-title">恩典陪伴空间</span>
+      <div style="width: 86px;"></div> <!-- 占位保持对称 -->
+    </header>
+
+    <!-- 灵宠视觉与数据区 -->
+    <div class="pet-hero">
+      <div class="pet-avatar-wrap"><span id="grace-pet-big-icon">🐣</span></div>
+      <div class="pet-tier-pill" id="grace-pet-tier-pill">LV.1 · 雏鸽形态</div>
+      <div class="pet-name" id="grace-pet-display-name">小小雏鸽</div>
+      <div class="pet-desc" id="grace-pet-display-desc">初萌爱意 · 开启一生一世的圣洁守望</div>
+
+      <div class="progress-box">
+        <div class="progress-meta">
+          <span id="progress-level-current">LV.1 小小雏鸽</span>
+          <span id="progress-level-target">距 LV.2 尚需 100 光芒</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-fill" id="grace-level-progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- 🎯 重构：剥离内联 style，采用语义色彩类名 val-streak 等 -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val val-glow" id="stat-glow-energy">0</div>
+          <div class="stat-lbl">✨ 光芒</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val val-streak" id="stat-streak-days">🔥 0 天</div>
+          <div class="stat-lbl" id="stat-streak-bonus">同行连胜</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val val-grace" id="stat-gratitude-count">0</div>
+          <div class="stat-lbl">💧 恩典</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val val-sacrifice" id="stat-sacrifice-count">0</div>
+          <div class="stat-lbl">🍎 舍己</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 互动喂养区 -->
+    <div class="action-panel">
+      <div class="action-header">
+        <span class="action-title">💧 献上今日感恩之露</span>
+        <span class="streak-tag" id="action-streak-tag">连胜加成 1.0x</span>
+      </div>
+      <textarea id="gratitude-input" class="grace-textarea" placeholder="今天 Ta 的哪一个小举动让你觉得很温暖？写下一句感恩之言..."></textarea>
+      <button class="feed-btn" id="feed-gratitude-btn">🕊️ 凝聚感恩之露并喂养 (+15 光芒)</button>
+      <button class="sacrifice-btn" id="feed-sacrifice-btn">🤝 我愿主动退让一步 · 结出舍己之果 (+30 光芒)</button>
+    </div>
+
+    <!-- 历史足迹区 -->
+    <div class="logs-panel">
+      <div class="logs-title">📜 近期感恩与包容足迹</div>
+      <div class="grace-log-list" id="grace-log-container">
+        <!-- JS 动态注入 -->
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js?v=2.5"></script>
+  <script src="js/effects.js?v=2.5"></script> 
+  <script src="js/pet-celebration.js?v=2.5"></script>
+  <script src="js/pet.js?v=2.5"></script>
+  <script>
+    if (!window.Effects) window.Effects = {};
+    window.Effects.showMiniToast = function(msg) {
+      const toast = document.getElementById("toastMsg");
+      if(toast) { toast.innerText = msg; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2200); }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.GracePetManager && window.LOVE_CONFIG) {
+        const petMgr = new window.GracePetManager(window.LOVE_CONFIG);
+        petMgr.init();
+      }
+    });
+  </script>
+</body>
+</html>
