@@ -1,6 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe) 控制中心主控
  * 文件名: js/admin.js
+ * 核心升级: 完善展览模式（Guest Mode）与底层函数级读写锁，防一切越权调用
  */
 
 let currentConfig = null;
@@ -73,6 +74,15 @@ function showToast(msg) {
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2500);
 }
+
+// 🛡️ [新增] 全局写锁保护：阻断未授权环境下的任意方法越界调用
+const ensureAdmin = () => {
+  if (!window.IS_ADMIN) {
+    showToast("👁️ 展览模式：仅供游览，暂无权限修改当前数据");
+    return false;
+  }
+  return true;
+};
 
 function getLocalSongCount() {
   const list = currentConfig?.audio?.playlist || [];
@@ -168,18 +178,66 @@ function syncAdminBackgroundTheme() {
   }
 }
 
+// 🛡️ [RBAC] 前端权限样式自动控制引擎
+function applyRBACUI() {
+  const actionContainer = document.querySelector(".admin-header-actions");
+  let loginBtn = document.getElementById("guestLoginBtn");
+
+  if (window.IS_ADMIN) {
+    document.documentElement.classList.add("is-owner");
+    if (loginBtn) loginBtn.style.display = "none";
+    
+    document.querySelectorAll('.admin-input, .admin-select, .admin-textarea').forEach(el => {
+      el.disabled = false;
+      el.style.opacity = "1";
+      el.style.cursor = "text";
+    });
+    document.querySelectorAll('.btn-save-main, .btn-add, .btn-del, .btn-upload, .btn-tool-accent').forEach(btn => {
+      if (btn.id !== "guestLoginBtn") btn.style.display = 'inline-flex';
+    });
+    
+    const pwdPanel = document.getElementById("admin_oldPassword")?.closest(".highlight-panel");
+    if (pwdPanel) pwdPanel.style.display = 'block';
+    
+  } else {
+    document.documentElement.classList.remove("is-owner");
+    
+    // 生成动态管理员登录按钮
+    if (!loginBtn && actionContainer) {
+      loginBtn = document.createElement("button");
+      loginBtn.id = "guestLoginBtn";
+      loginBtn.className = "btn-tool btn-tool-accent";
+      loginBtn.innerHTML = "🔐 验证登录";
+      loginBtn.onclick = window.openAdminLoginModal;
+      actionContainer.prepend(loginBtn);
+    } else if (loginBtn) {
+      loginBtn.style.display = "inline-flex";
+    }
+
+    // 禁用一切输入框并加上灰色毛玻璃效果
+    document.querySelectorAll('.admin-input, .admin-select, .admin-textarea').forEach(el => {
+      el.disabled = true;
+      el.style.opacity = "0.65";
+      el.style.cursor = "not-allowed";
+    });
+    
+    // 隐藏所有带有破坏性或修改属性的按键
+    document.querySelectorAll('.btn-save-main, .btn-add, .btn-del, .btn-upload, .btn-tool-accent').forEach(btn => {
+      if (btn.id !== "guestLoginBtn") btn.style.display = 'none';
+    });
+    
+    // 隐藏极其敏感的改密大面板
+    const pwdPanel = document.getElementById("admin_oldPassword")?.closest(".highlight-panel");
+    if (pwdPanel) pwdPanel.style.display = 'none';
+  }
+}
+
 async function fetchConfigFromCloud(tokenOverride) {
   const token = (tokenOverride || getAuthToken()).trim();
-  if (!token) return false;
-
   try {
     const res = await fetch(`/api/love/config?auth=${encodeURIComponent(token)}`, {
       headers: { "x-admin-auth": token, "Authorization": `Bearer ${token}` }
     });
-    
-    if (!res.ok) {
-      return fallbackLocalAuth(token);
-    }
     
     const data = await res.json();
     if (data.success) {
@@ -195,14 +253,17 @@ async function fetchConfigFromCloud(tokenOverride) {
         currentConfig = JSON.parse(JSON.stringify(window.LOVE_CONFIG || {}));
       }
 
-      const activePwd = (currentConfig.adminSecurity?.password || "").trim();
-      if (data.isAdmin || (activePwd && token === activePwd)) {
+      window.IS_ADMIN = data.isAdmin;
+      
+      if (window.IS_ADMIN) {
         currentAdminToken = token;
         localStorage.setItem("love_admin_token", token);
-        renderAllForms();
-        syncAdminBackgroundTheme(); 
-        return true;
       }
+
+      renderAllForms();
+      syncAdminBackgroundTheme(); 
+      applyRBACUI();
+      return true;
     }
     return false;
   } catch (_) {
@@ -214,18 +275,24 @@ function fallbackLocalAuth(token) {
   currentConfig = JSON.parse(JSON.stringify(window.LOVE_CONFIG || {}));
   currentQuota = null;
   const activePwd = (currentConfig.adminSecurity?.password || "").trim();
+  
+  window.IS_ADMIN = false;
   if (activePwd && token === activePwd) {
+    window.IS_ADMIN = true;
     currentAdminToken = token;
     localStorage.setItem("love_admin_token", token);
-    renderAllForms();
-    syncAdminBackgroundTheme(); 
-    return true;
   }
-  return false;
+  
+  renderAllForms();
+  syncAdminBackgroundTheme(); 
+  applyRBACUI();
+  return true; 
 }
 
 // 🌟 核心修复区：严格控制数据提交时序与阻塞弹窗
 async function modifyAdminPasswordWithOld() {
+  if (!ensureAdmin()) return;
+
   const oldPwdInput = document.getElementById("admin_oldPassword");
   const newPwdInput = document.getElementById("admin_newPassword");
   const confirmPwdInput = document.getElementById("admin_confirmPassword");
@@ -437,6 +504,7 @@ function renderQuotaStatus() {
 }
 
 async function submitDomainLicense() {
+  if (!ensureAdmin()) return;
   const codeInput = document.getElementById("inputLicenseCode");
   const code = codeInput ? codeInput.value.trim() : "";
   if (!code) return alert("请输入授权兑换码！");
@@ -515,12 +583,14 @@ function renderBirthdayCapsules() {
 }
 
 function addBirthdayCapsule() { 
+  if (!ensureAdmin()) return;
   if (!currentConfig.birthdayCapsules) currentConfig.birthdayCapsules = []; 
   currentConfig.birthdayCapsules.push({ id: "bd_" + Date.now(), target: "girl", date: "2026-05-20", template: "C", photo: "", voiceAudio: "", message: "生日快乐，我的唯一！\n\n在漫长的一生一世里，我愿将最纯洁的爱全部毫无保留地交给你。" }); 
   renderBirthdayCapsules(); 
 }
 
 function deleteBirthdayCapsule(idx) { 
+  if (!ensureAdmin()) return;
   if (confirm("⚠️ 确定要删除该生日盲盒胶囊吗？")) { currentConfig.birthdayCapsules.splice(idx, 1); renderBirthdayCapsules(); } 
 }
 
@@ -640,6 +710,7 @@ function renderAnniversariesList() {
 }
 
 function addCustomAnniversaryItem() {
+  if (!ensureAdmin()) return;
   if (!currentConfig.anniversaries) currentConfig.anniversaries = [];
   currentConfig.anniversaries.push({
     id: "anni_" + Date.now(), title: "新美好纪念日", type: "countdown", isLunar: false, isLeapMonth: false,
@@ -650,6 +721,7 @@ function addCustomAnniversaryItem() {
 }
 
 function addPresetAnniversaryTemplate(templateKey) {
+  if (!ensureAdmin()) return;
   if (!currentConfig.anniversaries) currentConfig.anniversaries = [];
   const templates = {
     birthday_girl: { title: "她的农历生日", type: "countdown", isLunar: true, isLeapMonth: false, date: "1998-04-15", annualRepeat: true, icon: "🎂", tag: "专属诞辰", memo: "愿你一生被爱，眼里常有星辰大海。", bgImg: "", voiceAudio: "", pinToHero: false },
@@ -667,6 +739,7 @@ function addPresetAnniversaryTemplate(templateKey) {
 }
 
 function togglePinAnniversaryToHero(idx) {
+  if (!ensureAdmin()) return;
   if (!currentConfig.anniversaries) return;
   const targetState = !currentConfig.anniversaries[idx].pinToHero;
   currentConfig.anniversaries.forEach((item, i) => { item.pinToHero = (i === idx) ? targetState : false; });
@@ -675,10 +748,12 @@ function togglePinAnniversaryToHero(idx) {
 }
 
 function deleteAnniversaryItem(idx) {
+  if (!ensureAdmin()) return;
   if (confirm("确定删除该纪念日事件吗？")) { currentConfig.anniversaries.splice(idx, 1); renderAnniversariesList(); }
 }
 
 function moveAnniversaryItem(idx, direction) {
+  if (!ensureAdmin()) return;
   const targetIdx = idx + direction;
   const list = currentConfig.anniversaries;
   if (targetIdx < 0 || targetIdx >= list.length) return;
@@ -733,6 +808,7 @@ function renderIcebreakerSettings() {
 }
 
 function updateIcebreakerActionText(stageKey, actionType, val) {
+  if (!ensureAdmin()) return;
   if (!currentConfig.icebreaker) currentConfig.icebreaker = {};
   if (!currentConfig.icebreaker.actions) currentConfig.icebreaker.actions = {};
   if (!Array.isArray(currentConfig.icebreaker.actions[stageKey])) {
@@ -744,6 +820,7 @@ function updateIcebreakerActionText(stageKey, actionType, val) {
 }
 
 async function clearIcebreakerHistory() {
+  if (!ensureAdmin()) return;
   if (!confirm("⚠️ 确定要清空历史和好足迹与当前未决信号吗？此操作不可撤销。")) return;
   showToast("⏳ 正在重置...");
   try {
@@ -802,6 +879,7 @@ async function executeOnlineMusicSearch() {
 }
 
 function setAsSingleBGM(title, artist, url) {
+  if (!ensureAdmin()) return;
   document.getElementById("audio_bgmTitle").value = title;
   document.getElementById("audio_bgmArtist").value = artist;
   document.getElementById("audio_bgmUrl").value = url;
@@ -818,6 +896,7 @@ function setAsSingleBGM(title, artist, url) {
 }
 
 function addSongToPlaylist(title, artist, url, cover) {
+  if (!ensureAdmin()) return;
   if (!currentConfig.audio) currentConfig.audio = {};
   if (!Array.isArray(currentConfig.audio.playlist)) currentConfig.audio.playlist = [];
   if (currentConfig.audio.playlist.length >= 50) return alert("⚠️ 播放列表最多可添加 50 首音乐！");
@@ -885,6 +964,7 @@ function renderPlaylist() {
 }
 
 function addCustomPlaylistItem() {
+  if (!ensureAdmin()) return;
   if (!currentConfig.audio) currentConfig.audio = {};
   if (!Array.isArray(currentConfig.audio.playlist)) currentConfig.audio.playlist = [];
   if (currentConfig.audio.playlist.length >= 50) return alert("⚠️ 播放列表已满！");
@@ -893,6 +973,7 @@ function addCustomPlaylistItem() {
 }
 
 function triggerDirectUploadLocalSong() {
+  if (!ensureAdmin()) return;
   if (!currentConfig.audio) currentConfig.audio = {};
   if (!Array.isArray(currentConfig.audio.playlist)) currentConfig.audio.playlist = [];
   if (currentConfig.audio.playlist.length >= 50) return alert("⚠️ 播放列表最多容纳 50 首！");
@@ -906,6 +987,7 @@ function triggerDirectUploadLocalSong() {
 }
 
 function triggerDirectUploadSongItem(idx) {
+  if (!ensureAdmin()) return;
   const currentUrl = currentConfig.audio.playlist[idx]?.url || "";
   const isAlreadyLocal = currentUrl.startsWith("/raw/") || currentUrl.includes("/assets/");
 
@@ -923,6 +1005,7 @@ function triggerDirectUploadSongItem(idx) {
 }
 
 function triggerDirectUploadSingleBgm() {
+  if (!ensureAdmin()) return;
   triggerDirectUpload("audio_bgmUrl", "audio/*", (url, file) => {
     const meta = parseSongFilename(file.name);
     if (document.getElementById("audio_bgmTitle")) document.getElementById("audio_bgmTitle").value = meta.title;
@@ -932,6 +1015,7 @@ function triggerDirectUploadSingleBgm() {
 }
 
 function clearCustomBg(gender) {
+  if (!ensureAdmin()) return;
   if (!currentConfig) return;
   if (!currentConfig.theme) currentConfig.theme = {};
   if (gender === 'boy') {
@@ -951,10 +1035,12 @@ function clearCustomBg(gender) {
 }
 
 function deletePlaylistSong(idx) {
+  if (!ensureAdmin()) return;
   if (confirm("确定移除该歌曲吗？")) { currentConfig.audio.playlist.splice(idx, 1); renderPlaylist(); }
 }
 
 function movePlaylistSong(idx, direction) {
+  if (!ensureAdmin()) return;
   const targetIdx = idx + direction;
   const list = currentConfig.audio.playlist;
   if (targetIdx < 0 || targetIdx >= list.length) return;
@@ -1062,6 +1148,7 @@ function renderThemeShowroom() {
 }
 
 function selectBoyTheme(themeId) { 
+  if (!ensureAdmin()) return;
   if (!currentConfig.theme) currentConfig.theme = {}; 
   currentConfig.theme.currentThemeBoy = themeId; 
   currentConfig.theme.currentTheme = themeId; 
@@ -1071,6 +1158,7 @@ function selectBoyTheme(themeId) {
   showToast(`✓ 已选定男生主题【${themeId}】`); 
 }
 function selectGirlTheme(themeId) { 
+  if (!ensureAdmin()) return;
   if (!currentConfig.theme) currentConfig.theme = {}; 
   currentConfig.theme.currentThemeGirl = themeId; 
   localStorage.setItem('love_perspective', 'girl');
@@ -1136,8 +1224,8 @@ function renderTimelineList() {
     container.appendChild(card);
   });
 }
-function addTimelineNode() { if (!currentConfig.timeline) currentConfig.timeline = []; currentConfig.timeline.push({ id: "node_" + Date.now(), date: "2026.05.20", tag: "甜蜜日常", title: "新瞬间", desc: "记录下这一天...", location: "📍 幸福角落", frontImg: "assets/images/photo_01.jpg", backText: "独家留言...", voiceAudio: "" }); renderTimelineList(); }
-function deleteTimelineNode(idx) { if (confirm("确定删除该节点吗？")) { currentConfig.timeline.splice(idx, 1); renderTimelineList(); } }
+function addTimelineNode() { if (!ensureAdmin()) return; if (!currentConfig.timeline) currentConfig.timeline = []; currentConfig.timeline.push({ id: "node_" + Date.now(), date: "2026.05.20", tag: "甜蜜日常", title: "新瞬间", desc: "记录下这一天...", location: "📍 幸福角落", frontImg: "assets/images/photo_01.jpg", backText: "独家留言...", voiceAudio: "" }); renderTimelineList(); }
+function deleteTimelineNode(idx) { if (!ensureAdmin()) return; if (confirm("确定删除该节点吗？")) { currentConfig.timeline.splice(idx, 1); renderTimelineList(); } }
 
 function renderChecklist() {
   const container = document.getElementById("checklistItemsContainer");
@@ -1169,8 +1257,8 @@ function renderChecklist() {
     container.appendChild(card);
   });
 }
-function addChecklistItem() { if (!currentConfig.checklist100) currentConfig.checklist100 = []; currentConfig.checklist100.push({ id: currentConfig.checklist100.length + 1, phase: 1, title: "一起去做一件浪漫的事", completed: false }); renderChecklist(); }
-function deleteChecklistItem(idx) { currentConfig.checklist100.splice(idx, 1); renderChecklist(); }
+function addChecklistItem() { if (!ensureAdmin()) return; if (!currentConfig.checklist100) currentConfig.checklist100 = []; currentConfig.checklist100.push({ id: currentConfig.checklist100.length + 1, phase: 1, title: "一起去做一件浪漫的事", completed: false }); renderChecklist(); }
+function deleteChecklistItem(idx) { if (!ensureAdmin()) return; currentConfig.checklist100.splice(idx, 1); renderChecklist(); }
 
 function renderScratchCards() {
   const container = document.getElementById("scratchCardsContainer");
@@ -1203,13 +1291,14 @@ function renderScratchCards() {
     container.appendChild(card);
   });
 }
-function addScratchCard() { if (!currentConfig.scratchCards) currentConfig.scratchCards = []; currentConfig.scratchCards.push({ id: "card_" + Date.now(), phase: 1, title: "专属心愿卡", content: "无条件兑现一次！", icon: "✨", scratched: false, used: false, usedTime: "" }); renderScratchCards(); }
-function deleteScratchCard(idx) { currentConfig.scratchCards.splice(idx, 1); renderScratchCards(); }
+function addScratchCard() { if (!ensureAdmin()) return; if (!currentConfig.scratchCards) currentConfig.scratchCards = []; currentConfig.scratchCards.push({ id: "card_" + Date.now(), phase: 1, title: "专属心愿卡", content: "无条件兑现一次！", icon: "✨", scratched: false, used: false, usedTime: "" }); renderScratchCards(); }
+function deleteScratchCard(idx) { if (!ensureAdmin()) return; currentConfig.scratchCards.splice(idx, 1); renderScratchCards(); }
 
 let activeUploadCallback = null;
 let activeUploadInputId = null;
 
 function triggerDirectUpload(targetInputId, acceptType, callback) {
+  if (!ensureAdmin()) return;
   activeUploadInputId = targetInputId;
   activeUploadCallback = callback;
   const uploader = document.getElementById("globalUploader");
@@ -1273,6 +1362,7 @@ let _recMediaRecorder = null, _recChunks = [], _recStream = null;
 let _recTargetInputId = null, _recCallback = null, _recEl = null, _recTimer = null, _recSecs = 0;
 
 async function startDirectRecord(btnEl, targetInputId, callback) {
+  if (!ensureAdmin()) return;
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     _recStream = stream;
@@ -1325,12 +1415,14 @@ function stopDirectRecord() {
   if (_recMediaRecorder && _recMediaRecorder.state === 'recording') _recMediaRecorder.stop();
 }
 function toggleDirectRecord(btnEl, targetInputId, callback) {
+  if (!ensureAdmin()) return;
   if (_recMediaRecorder && _recMediaRecorder.state === 'recording') { stopDirectRecord(); }
   else { startDirectRecord(btnEl, targetInputId, callback); }
 }
 
 // 🌟 核心修复区：彻底分离鉴权凭证与新密码，确保数据精准同步
 async function saveAllConfigToCloud(overrideToken) {
+  if (!ensureAdmin()) return false;
   if (!currentConfig) return false;
   const activePassword = overrideToken || (currentConfig.adminSecurity?.password || "").trim();
   
@@ -1467,19 +1559,81 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
   });
 });
 
+// ============================================================================
+// 🔐 后台动态弹窗身份鉴权模块
+// ============================================================================
+function initAdminAuthModal() {
+  const modal = document.getElementById("hq-admin-auth-modal");
+  const input = document.getElementById("hq-admin-input");
+  const confirmBtn = document.getElementById("hq-admin-confirm");
+  const cancelBtn = document.getElementById("hq-admin-cancel");
+  const errorText = document.getElementById("hq-admin-error");
+
+  window.openAdminLoginModal = function() {
+      if (!modal) return;
+      if (input) input.value = "";
+      if (errorText) errorText.style.display = "none";
+      modal.style.display = "flex";
+      setTimeout(() => modal.classList.add("active"), 10);
+      if (input) input.focus();
+  };
+
+  function hideModal() {
+      if (!modal) return;
+      modal.classList.remove("active");
+      setTimeout(() => { modal.style.display = "none"; }, 300);
+  }
+
+  if (cancelBtn) cancelBtn.onclick = hideModal;
+  if (confirmBtn) confirmBtn.onclick = () => doLogin(input ? input.value : "");
+  if (input) input.onkeydown = (e) => { if (e.key === "Enter") doLogin(input.value); };
+
+  async function doLogin(pwd) {
+      if (!pwd) {
+          if (errorText) { errorText.textContent = "请输入密钥"; errorText.style.display = "block"; }
+          return;
+      }
+      const origText = confirmBtn.textContent;
+      confirmBtn.textContent = "鉴证中...";
+      try {
+          const res = await fetch("/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: pwd })
+          });
+          const data = await res.json();
+          if (data.success && data.token) {
+              localStorage.setItem("love_owner_token", data.token);
+              localStorage.setItem("love_admin_token", data.token);
+              window.IS_ADMIN = true;
+              hideModal();
+              showToast("✨ 鉴证成功，全线权限已开放");
+              fetchConfigFromCloud(data.token); 
+          } else {
+              if (errorText) { errorText.textContent = "❌ 密钥错误或无权限"; errorText.style.display = "block"; }
+          }
+      } catch(e) {
+          if (errorText) { errorText.textContent = "网络异常"; errorText.style.display = "block"; }
+      } finally {
+          confirmBtn.textContent = origText;
+      }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-  const token = getAuthToken();
   const layout = document.getElementById("adminLayout");
+  initAdminAuthModal();
 
-  if (!token) { alert("⚠️ 未授权访问"); location.href = "index.html"; return; }
-
-  const success = await fetchConfigFromCloud(token);
+  // 允许空 Token 进行云端请求，以便获取最新的展览模式只读配置
+  const success = await fetchConfigFromCloud();
+  
   if (success) {
     if (layout) layout.style.display = "block";
-    showToast("✓ 验证成功，已连接控制中心");
+    showToast(window.IS_ADMIN ? "✓ 验证成功，已连接控制中心" : "👁️ 展览模式：系统已进入只读状态");
   } else {
     localStorage.removeItem("love_admin_token");
     sessionStorage.removeItem("universe_admin_auth");
-    alert("❌ 口令失效或未授权！"); location.href = "index.html";
+    alert("❌ 配置加载失败，请检查网络！"); 
+    location.href = "index.html";
   }
 });
