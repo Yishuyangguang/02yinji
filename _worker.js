@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe SaaS Engine)
  * 文件名: _worker.js
- * 架构: 异步静默垃圾回收 + 单一高科鉴权中间件 + 柔性降级(防500报错) + 独立日记应用 API
+ * 架构: 异步静默垃圾回收 + 单一高科鉴权中间件 + 柔性降级(防500报错) + 统一大门禁体系
  */
 export default {
   async fetch(request, env, ctx) {
@@ -52,7 +52,7 @@ export default {
       return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
     }
 
-    // 🌟 统一身份鉴权逻辑：废除双密码，实现单一管理员密码校验
+    // 🌟 统一身份鉴权逻辑：完全废除双密码，合并门禁与后台密码体系
     async function verifyAdminAuth(req) {
       const headerAuth = req.headers.get("x-admin-auth") || req.headers.get("x-member-token") || req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       const queryAuth = url.searchParams.get("token") || url.searchParams.get("auth") || url.searchParams.get("mtoken");
@@ -63,12 +63,12 @@ export default {
       const expectedToken = await buildAdminToken(rawHost);
       if (token === expectedToken) return true;
 
-      // 2. 万能救援密钥与环境变量密码校验 (向下兼容直接传密码的旧逻辑)
+      // 2. 万能救援密钥与环境变量密码校验 (向下兼容直接传密码)
       if (env.MASTER_RESCUE_KEY && token === String(env.MASTER_RESCUE_KEY).trim()) return true;
       if (ADMIN_PASSWORD && ADMIN_PASSWORD !== "521" && token === ADMIN_PASSWORD) return true;
       if (token === "521") return true;
 
-      // 3. 向下兼容：读取云端旧配置中可能残留的用户自定义密码
+      // 3. 向下兼容：自动同步读取云端密码
       if (bucket) {
         try {
           const obj = await bucket.get(CONFIG_KEY);
@@ -266,7 +266,7 @@ export default {
     }
 
     try {
-      // 🌟 1. 登录与身份验证合并路由 (统一入口处理)
+      // 🌟 1. 登录与身份验证合并路由：彻底打通 Admin 与 Gatekeeper 密码验证
       if ((url.pathname === "/api/login" || url.pathname === "/api/auth/login" || url.pathname === "/api/love/verify-gatekeeper") && request.method === "POST") {
         let reqData = {}; 
         try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false, error: "数据格式错误" }, 400); }
@@ -285,6 +285,7 @@ export default {
             const cfgObj = await bucket.get(CONFIG_KEY);
             if (cfgObj) {
               const cfg = JSON.parse(await cfgObj.text());
+              // 🌟 核心：统一鉴权引擎，自动接轨后台密码
               if (cfg.adminSecurity?.password && inputPwd === String(cfg.adminSecurity.password).trim()) isValid = true;
               else if (cfg.gatekeeper?.correctAnswer && inputPwd === String(cfg.gatekeeper.correctAnswer).trim()) isValid = true;
             }
