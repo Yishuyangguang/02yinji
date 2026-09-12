@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe) 前台核心主控
  * 文件名: js/core.js
- * 作用: 门禁鉴权、异步竞态锁防闪烁、高定版全局密码弹窗、全局动态权限（RBAC）分发重组
+ * 作用: 门禁统一鉴权、异步竞态锁防闪烁、幽灵冒泡拦截、全局动态权限（RBAC）分发重组
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 1. 初始化权限验证与视图装载
   window.IS_ADMIN = false;
-  checkAdminStatus(); // 异步验证，成功后自动刷新局部视图
+  checkAdminStatus(); 
 
   const cloudSyncPromise = syncCloudData();
 
@@ -127,7 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const roseOverlay = document.getElementById('rose-click-overlay');
   if (roseOverlay) {
-    roseOverlay.addEventListener('click', async () => {
+    roseOverlay.addEventListener('click', async (e) => {
+      e.stopPropagation();
       roseOverlay.style.pointerEvents = 'none';
       roseOverlay.style.display = 'none';
       
@@ -194,7 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const cancelBtn = document.getElementById("hq-admin-cancel");
     const errorText = document.getElementById("hq-admin-error");
 
-    // 全局绑定给星轨功能中枢内的底层按钮调用
     window.openAdminAuthModal = function() {
       if (typeof window.closeGlobalHub === "function") window.closeGlobalHub();
       if (window.IS_ADMIN) location.href = "admin.html";
@@ -212,11 +212,11 @@ document.addEventListener("DOMContentLoaded", () => {
       trigger.addEventListener("touchend", (e) => {
         const now = Date.now();
         if (now - lastTap < 300 && now - lastTap > 0) {
-          e.preventDefault(); showModal(); lastTap = 0;
+          e.preventDefault(); e.stopPropagation(); showModal(); lastTap = 0;
         } else { lastTap = now; }
       }, { passive: false });
       trigger.addEventListener("dblclick", (e) => {
-        e.preventDefault(); showModal();
+        e.preventDefault(); e.stopPropagation(); showModal();
       });
       trigger.addEventListener("contextmenu", e => e.preventDefault());
     }
@@ -241,8 +241,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (cancelBtn) cancelBtn.onclick = hideModal;
-    if (confirmBtn) confirmBtn.onclick = () => doLogin(input ? input.value : "");
-    if (input) input.onkeydown = (e) => { if (e.key === "Enter") doLogin(input.value); };
+    if (confirmBtn) confirmBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); doLogin(input ? input.value : ""); };
+    if (input) input.onkeydown = (e) => { 
+      if (e.key === "Enter") {
+        e.preventDefault(); e.stopPropagation(); doLogin(input.value); 
+      }
+    };
 
     async function doLogin(pwd) {
       const val = (pwd || "").trim();
@@ -291,19 +295,96 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ============================================================================
+  // 🚪 时空大门验证引擎 (Gatekeeper)
+  // ============================================================================
   function initGatekeeperUI() {
     const gateCfg = config.gatekeeper || {};
     if (dom.gatekeeperTitle) dom.gatekeeperTitle.textContent = gateCfg.title || "🔒 验证恒久契约";
-    if (dom.gatekeeperQuestion) dom.gatekeeperQuestion.textContent = gateCfg.question || "请输入纪念日口令，或点击麦克风念出誓言：";
-    if (dom.gatekeeperHint) dom.gatekeeperHint.textContent = gateCfg.hint || "提示：包容与接纳，爱是永不止息";
+    if (dom.gatekeeperQuestion) dom.gatekeeperQuestion.textContent = gateCfg.question || "请输入专属统一口令，或点击麦克风念出誓言：";
+    
+    // 🌟 明确提示默认口令，方便用户使用统一密码 521
+    if (dom.gatekeeperHint) {
+      dom.gatekeeperHint.textContent = gateCfg.hint || "提示：默认口令为 521 (支持在后台统一修改)";
+    }
+    
+    // 🌟 拦截幽灵点击事件，彻底解决由于事件穿透引发的乱跳转Bug
     if (dom.gatekeeperBtn) {
-      dom.gatekeeperBtn.onclick = (e) => { e.preventDefault(); verifyPassword(dom.gatekeeperInput ? dom.gatekeeperInput.value.trim() : ""); };
+      dom.gatekeeperBtn.onclick = (e) => { 
+        e.preventDefault(); 
+        e.stopPropagation();
+        verifyPassword(dom.gatekeeperInput ? dom.gatekeeperInput.value.trim() : ""); 
+      };
     }
     if (dom.gatekeeperInput) {
-      dom.gatekeeperInput.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); verifyPassword(dom.gatekeeperInput.value.trim()); } };
+      dom.gatekeeperInput.onkeydown = (e) => { 
+        if (e.key === "Enter") { 
+          e.preventDefault(); 
+          e.stopPropagation();
+          verifyPassword(dom.gatekeeperInput.value.trim()); 
+        } 
+      };
     }
     if (dom.voiceUnlockBtn) {
-      dom.voiceUnlockBtn.onclick = (e) => { e.preventDefault(); startVoiceRecognition(); };
+      dom.voiceUnlockBtn.onclick = (e) => { 
+        e.preventDefault(); 
+        e.stopPropagation();
+        startVoiceRecognition(); 
+      };
+    }
+  }
+
+  async function verifyPassword(inputVal) {
+    if (!inputVal) return;
+
+    if (dom.gatekeeperBtn) {
+      dom.gatekeeperBtn.disabled = true;
+      dom.gatekeeperBtn.querySelector("span").textContent = "鉴证中...";
+    }
+
+    try {
+      const res = await fetch("/api/love/verify-gatekeeper", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: inputVal })
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        if (window.Effects) {
+          window.Effects.playAudio("gatekeeperPass");
+          window.Effects.fireFireworks();
+        }
+        if (result.memberToken) {
+          try { sessionStorage.setItem("member_token", result.memberToken); } catch (_) {}
+        }
+        // 如果输入的是后台管理密码，直接同步提权
+        if (result.isAdmin) {
+          localStorage.setItem("love_owner_token", inputVal);
+          localStorage.setItem("love_admin_token", inputVal);
+          updateFrontendRBAC(true);
+        }
+        unlockMainUniverse(true);
+      } else {
+        triggerPasswordError();
+      }
+    } catch (_) {
+      // 🛡️ 离线沙盒降级兜底：支持 521 与经典密码
+      if (inputVal === "521" || inputVal === "240520" || (config.adminSecurity && inputVal === config.adminSecurity.password)) {
+        if (inputVal === "521" || (config.adminSecurity && inputVal === config.adminSecurity.password)) {
+          localStorage.setItem("love_owner_token", inputVal);
+          localStorage.setItem("love_admin_token", inputVal);
+          updateFrontendRBAC(true);
+        }
+        unlockMainUniverse(true);
+      } else {
+        triggerPasswordError();
+      }
+    } finally {
+      if (dom.gatekeeperBtn) {
+        dom.gatekeeperBtn.disabled = false;
+        dom.gatekeeperBtn.querySelector("span").textContent = "开启专属时空 ➔";
+      }
     }
   }
 
@@ -348,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const heardText = (finalTranscript || interim).trim();
       if (dom.gatekeeperHint && heardText) {
-        dom.gatekeeperHint.textContent = `听到誓言：“${heardText}”，正在鉴证...`;
+        dom.gatekeeperHint.textContent = `听到语音：“${heardText}”，正在鉴证...`;
       }
 
       if (finalTranscript) {
@@ -394,15 +475,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function verifyVoiceVow(spokenText) {
     const cleanSpoken = spokenText.replace(/[，。！？\s]/g, "").toLowerCase();
-    const rawVows = config.gatekeeper?.voiceVows || "众水不能熄灭, 我愿一生包容你, 永远爱你, 240520";
+    const rawVows = config.gatekeeper?.voiceVows || "众水不能熄灭, 我愿一生包容你, 永远爱你, 240520, 521";
     const vowList = rawVows.split(/[,，|]/).map(s => s.replace(/[，。！？\s]/g, "").toLowerCase()).filter(Boolean);
 
     vowList.push("众水不能熄灭");
     vowList.push("包容");
     vowList.push("接纳");
     vowList.push("一生一世");
-    vowList.push(String(config.gatekeeper?.correctAnswer || "240520").trim().toLowerCase());
+    // 🌟 语音引擎兼容统一密码 521
     vowList.push("521");
+    if (config.adminSecurity && config.adminSecurity.password) {
+      vowList.push(String(config.adminSecurity.password).trim().toLowerCase());
+    }
 
     const isMatch = vowList.some(vow => cleanSpoken.includes(vow));
 
@@ -418,100 +502,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => unlockMainUniverse(true), 600);
     } else {
       triggerPasswordError();
-    }
-  }
-
-  async function syncCloudData() {
-    try {
-      const res = await fetch("/api/love/config");
-      const data = await res.json();
-      if (data.success && data.custom && data.config) {
-        config = mergeWithDefaultConfig(data.config);
-        window.LOVE_CONFIG = config;
-        
-        const isGatekeeperEnabled = config.gatekeeper ? config.gatekeeper.enabled !== false : true;
-        localStorage.setItem("love_gatekeeper_enabled_snapshot", isGatekeeperEnabled ? "true" : "false");
-
-        initGatekeeperUI();
-
-        if (window.Effects) {
-          window.Effects.updateConfig(config);
-        }
-        
-        if (sessionStorage.getItem("universe_unlocked") === "true") {
-           if (window.AnniversaryManager) {
-               const currentInstance = Object.values(window).find(val => val instanceof window.AnniversaryManager);
-               if (currentInstance) currentInstance.init(); 
-           }
-        }
-      }
-    } catch (_) {}
-
-    if (config.meta) {
-      if (dom.heroNames) {
-        const boy = escapeHtml(config.meta.boyName || "男孩");
-        const girl = escapeHtml(config.meta.girlName || "女孩");
-        dom.heroNames.innerHTML = `${boy} <span class="name-connector">&</span> ${girl}`;
-      }
-      if (dom.heroSubtitle) dom.heroSubtitle.textContent = config.meta.siteSubtitle || "众水不能熄灭爱情，大水不能淹没 · 一生一世的契约";
-      if (config.meta.siteTitle) document.title = config.meta.siteTitle;
-    }
-
-    if (window.ThemeEngine) window.ThemeEngine.init();
-    if (window.StageManager) window.StageManager.init();
-    if (window.PhotoWallManager) {
-      const photoWall = new window.PhotoWallManager(config);
-      photoWall.init();
-    }
-
-    initLicenseActivationTrigger();
-  }
-
-  async function verifyPassword(inputVal) {
-    if (!inputVal) return;
-
-    if (dom.gatekeeperBtn) {
-      dom.gatekeeperBtn.disabled = true;
-      dom.gatekeeperBtn.querySelector("span").textContent = "鉴证中...";
-    }
-
-    try {
-      const res = await fetch("/api/love/verify-gatekeeper", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: inputVal })
-      });
-      const result = await res.json();
-
-      if (result.success) {
-        if (window.Effects) {
-          window.Effects.playAudio("gatekeeperPass");
-          window.Effects.fireFireworks();
-        }
-        if (result.memberToken) {
-          try { sessionStorage.setItem("member_token", result.memberToken); } catch (_) {}
-        }
-        // 如果后端验证为超级管理员权限，直接前端升权
-        if (result.isAdmin) {
-          localStorage.setItem("love_owner_token", inputVal);
-          localStorage.setItem("love_admin_token", inputVal);
-          updateFrontendRBAC(true);
-        }
-        unlockMainUniverse(true);
-      } else {
-        triggerPasswordError();
-      }
-    } catch (_) {
-      if (inputVal === "240520") {
-        unlockMainUniverse(true);
-      } else {
-        triggerPasswordError();
-      }
-    } finally {
-      if (dom.gatekeeperBtn) {
-        dom.gatekeeperBtn.disabled = false;
-        dom.gatekeeperBtn.querySelector("span").textContent = "开启专属时空";
-      }
     }
   }
 
@@ -633,6 +623,52 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
     setTimeout(typeNextChar, 500);
+  }
+
+  async function syncCloudData() {
+    try {
+      const res = await fetch("/api/love/config");
+      const data = await res.json();
+      if (data.success && data.custom && data.config) {
+        config = mergeWithDefaultConfig(data.config);
+        window.LOVE_CONFIG = config;
+        
+        const isGatekeeperEnabled = config.gatekeeper ? config.gatekeeper.enabled !== false : true;
+        localStorage.setItem("love_gatekeeper_enabled_snapshot", isGatekeeperEnabled ? "true" : "false");
+
+        initGatekeeperUI();
+
+        if (window.Effects) {
+          window.Effects.updateConfig(config);
+        }
+        
+        if (sessionStorage.getItem("universe_unlocked") === "true") {
+           if (window.AnniversaryManager) {
+               const currentInstance = Object.values(window).find(val => val instanceof window.AnniversaryManager);
+               if (currentInstance) currentInstance.init(); 
+           }
+        }
+      }
+    } catch (_) {}
+
+    if (config.meta) {
+      if (dom.heroNames) {
+        const boy = escapeHtml(config.meta.boyName || "男孩");
+        const girl = escapeHtml(config.meta.girlName || "女孩");
+        dom.heroNames.innerHTML = `${boy} <span class="name-connector">&</span> ${girl}`;
+      }
+      if (dom.heroSubtitle) dom.heroSubtitle.textContent = config.meta.siteSubtitle || "众水不能熄灭爱情，大水不能淹没 · 一生一世的契约";
+      if (config.meta.siteTitle) document.title = config.meta.siteTitle;
+    }
+
+    if (window.ThemeEngine) window.ThemeEngine.init();
+    if (window.StageManager) window.StageManager.init();
+    if (window.PhotoWallManager) {
+      const photoWall = new window.PhotoWallManager(config);
+      photoWall.init();
+    }
+
+    initLicenseActivationTrigger();
   }
 
   function initLicenseActivationTrigger() {
