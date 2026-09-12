@@ -292,7 +292,7 @@
     </div>
   </aside>
 
-  <!-- 🌟 重构：全局高颜值星轨中枢触发器 -->
+  <!-- 🌟 重构：全局高颜值星轨中枢触发器 (适度上移) -->
   <button class="global-hub-trigger" id="global-hub-trigger" title="开启星轨中枢" onclick="openGlobalHub()">
     <span class="global-hub-icon">🌌</span>
   </button>
@@ -397,7 +397,7 @@
           </div>
           <div class="hub-btn" data-open-stage="icebreaker" onclick="closeGlobalHub(); if(window.StageManager) window.StageManager.openStage('icebreaker')">
             <div class="hub-btn__glow"></div>
-            <span class="hub-btn__icon">🕊️</span>
+            <span class="hub-btn__icon">💌</span> <!-- 修改了图标，避免与灵宠重复 -->
             <div class="hub-btn__info">
               <span class="hub-btn__title">破冰和解</span>
               <span class="hub-btn__desc">情感信号箱 · 避风港</span>
@@ -449,6 +449,15 @@
             <div class="hub-btn__info">
               <span class="hub-btn__title">生日盲盒</span>
               <span class="hub-btn__desc">3D时空贺卡 · 永存</span>
+            </div>
+          </div>
+          <!-- 🌟 新增：恩典灵宠入口，收编于功能中枢 -->
+          <div class="hub-btn" onclick="closeGlobalHub(); openGracePet()">
+            <div class="hub-btn__glow"></div>
+            <span class="hub-btn__icon">🕊️</span>
+            <div class="hub-btn__info">
+              <span class="hub-btn__title">恩典灵宠</span>
+              <span class="hub-btn__desc">感恩使者 · 陪伴升级</span>
             </div>
           </div>
         </div>
@@ -538,7 +547,7 @@
 
     <section id="stage-icebreaker" class="stage-modal">
       <div class="stage-modal__header">
-        <div class="stage-modal__title-box"><span class="stage-modal__icon">🕊️</span><h2 class="stage-modal__title">破冰和解 · 情感信号箱</h2></div>
+        <div class="stage-modal__title-box"><span class="stage-modal__icon">💌</span><h2 class="stage-modal__title">破冰和解 · 情感信号箱</h2></div>
         <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
       </div>
       <div class="stage-modal__body">
@@ -716,6 +725,26 @@
       if(modal && dialog) {
         dialog.classList.remove('active');
         setTimeout(() => modal.classList.remove('active'), 300);
+      }
+    }
+
+    // 🌟 灵宠入口收编，底层兼容唤起原有实例
+    function openGracePet() {
+      const petWidget = document.querySelector('.grace-pet-widget') || 
+                        document.getElementById('grace-pet-widget') || 
+                        document.querySelector('[class*="pet-widget"]');
+      if (petWidget) {
+        // 物理点击模拟，确保原有 pet.js 拦截器不受影响
+        const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+        petWidget.dispatchEvent(clickEvent);
+      } else if (window.GracePetManager && window.GracePetInstance) {
+        if (typeof window.GracePetInstance.showDashboard === 'function') {
+          window.GracePetInstance.showDashboard();
+        } else {
+          alert("🕊️ 灵宠控制面板准备中...");
+        }
+      } else {
+        alert("🕊️ 灵宠正在休息中...");
       }
     }
 
