@@ -1,7 +1,7 @@
 /**
  * 恋爱时光轴 & 漫游宇宙 (Love Universe)
  * 文件名: css/components.css
- * 核心升级：星轨中枢 3x3 导航网格 + 全屏沉浸分幕 + 科幻防遮挡门禁舱 + 3D 动态生辰盲盒
+ * 核心升级：顶部悬浮音乐胶囊 + 预留全局星轨中枢按钮 + 全屏沉浸分幕 + 科幻门禁舱
  */
 
 /* ================= 基础背景层 ================= */
@@ -69,7 +69,7 @@
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* ================= 🌟 星轨高科门禁舱重构 (修复竞态红屏、实现极致对称与防遮挡) ================= */
+/* ================= 🌟 星轨高科门禁舱 ================= */
 .gatekeeper {
   position: fixed;
   inset: 0;
@@ -88,7 +88,7 @@
   width: 100%;
   max-width: 400px;
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(3, 7, 18, 0.95) 100%);
-  border: 1.5px solid rgba(56, 189, 248, 0.3); /* 科技青边缘 */
+  border: 1.5px solid rgba(56, 189, 248, 0.3); 
   border-radius: 26px;
   padding: 30px 24px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2);
@@ -98,7 +98,6 @@
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
 }
 
-/* 🎯 iPhone 软键盘防遮挡（焦点激活时丝滑上浮） */
 @media (max-width: 640px) {
   .gatekeeper__dialog:focus-within {
     transform: translateY(-15vh) !important;
@@ -148,7 +147,6 @@
   margin-bottom: 16px;
 }
 
-/* 🎯 矩阵重构：强行 1fr 54px 的等高网格实现物理级绝对对称 */
 .gatekeeper__input-group { 
   display: grid;
   grid-template-columns: 1fr 54px;
@@ -186,7 +184,6 @@
   font-weight: 600;
 }
 
-/* 全息独立麦克风按钮 */
 .voice-unlock-btn {
   background: rgba(255, 255, 255, 0.05) !important;
   border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
@@ -215,7 +212,7 @@
   width: 100%; 
   padding: 14px 20px; 
   font-size: 15px; 
-  color: #ffffff !important;   /* 强制白色文字，避免继承主题的深色 --text-main 导致看不清 */
+  color: #ffffff !important;   
   -webkit-text-fill-color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
@@ -490,7 +487,6 @@
   z-index: 50;
 }
 
-/* 🌟 核心修正：双击感应区获得绝对置顶优先级，确保不被遮挡 */
 .hub-dock__header .longpress-overlay {
   position: absolute;
   inset: -15px -10px;
@@ -1264,108 +1260,111 @@
   font-family: ui-monospace, monospace;
 }
 
-/* ================= 🌟 极简半透明悬浮爱心音乐晶体 ================= */
-.vinyl-player {
+/* ================= 🌟 极简半透明悬浮爱心音乐晶体 (升级版：顶部音乐胶囊) ================= */
+.top-music-capsule {
   position: fixed;
-  bottom: max(20px, env(safe-area-inset-bottom, 20px));
-  left: max(16px, env(safe-area-inset-left, 16px));
+  top: max(18px, env(safe-area-inset-top, 18px));
+  left: max(18px, env(safe-area-inset-left, 18px));
   z-index: 55000;
   display: flex;
   align-items: center;
-  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 30px;
+  padding: 4px 6px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.2);
   transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-}
-
-.heart-music-capsule {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--bg-card, rgba(20, 20, 38, 0.75));
-  border: 1.5px solid var(--border-card, rgba(255, 255, 255, 0.25));
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px var(--rose-gold-glow, rgba(251, 113, 133, 0.35));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  user-select: none;
-  pointer-events: auto;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.heart-music-capsule:hover {
-  transform: scale(1.1) translateY(-2px);
-  border-color: var(--accent-gold, #f59e0b);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 22px var(--accent-gold-glow, rgba(245, 158, 11, 0.45));
+.top-music-capsule:hover {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(244, 63, 94, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(244, 63, 94, 0.2);
 }
-
-.heart-music-capsule:active {
-  transform: scale(0.95);
-}
-
-.heart-music-core {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
+.music-capsule-inner {
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
+  gap: 10px;
+  cursor: pointer;
+  padding-right: 8px;
+}
+.music-cover-wrap {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #fb7185, #f43f5e);
+  position: relative; overflow: hidden;
   box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
-  pointer-events: none;
+  display: flex; justify-content: center; align-items: center;
+}
+.music-cover {
+  width: 100%; height: 100%; object-fit: cover;
+  animation: spinCover 10s linear infinite;
+  animation-play-state: paused;
+}
+.playing .music-cover { animation-play-state: running; }
+.music-pulse {
+  position: absolute; inset: -2px; border-radius: 50%;
+  border: 1.5px solid #f43f5e; opacity: 0;
+}
+.playing .music-pulse { animation: heartPulseRipple 2s infinite ease-out; }
+
+.music-info {
+  max-width: 100px; overflow: hidden; white-space: nowrap;
+  display: flex; align-items: center;
+}
+.music-title {
+  font-size: 13px; font-weight: 800; color: #f8fafc;
+  animation: marquee 8s linear infinite;
+  display: inline-block;
+}
+@keyframes spinCover { 100% { transform: rotate(360deg); } }
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
 }
 
-.heart-music-icon {
-  font-size: 15px;
-  line-height: 1;
-  pointer-events: none;
-  transition: transform 0.3s ease;
+.music-controls {
+  display: flex; align-items: center; gap: 4px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  padding-left: 6px; margin-left: 2px;
 }
-
-.heart-music-capsule.playing .heart-music-icon {
-  animation: heartBeatPulse 1.2s infinite ease-in-out;
+.music-ctrl-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #cbd5e1; cursor: pointer; background: transparent; transition: 0.2s;
 }
+.music-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.play-pause .heart-music-icon { font-size: 14px; transition: transform 0.2s; }
+.playing .heart-music-icon { animation: heartBeatPulse 1.2s infinite ease-in-out; }
 
-.heart-music-cover {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: none;
-  pointer-events: none;
-}
-
-.heart-music-pulse {
-  position: absolute;
-  inset: -4px;
+/* ================= 预留：全局星轨中枢触发器 ================= */
+.global-hub-trigger {
+  position: fixed;
+  bottom: max(24px, env(safe-area-inset-bottom, 24px));
+  right: max(20px, env(safe-area-inset-right, 20px));
+  z-index: 55000;
+  width: 56px; height: 56px;
   border-radius: 50%;
-  border: 1.5px solid var(--primary-pink, #f43f5e);
-  opacity: 0;
-  pointer-events: none;
+  background: linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(3,7,18,0.95) 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.25), inset 0 1px 2px rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.heart-music-capsule.playing .heart-music-pulse {
-  animation: heartPulseRipple 2s infinite ease-out;
+.global-hub-trigger::before {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, rgba(245, 158, 11, 0.6), transparent 50%);
+  animation: hubRotate 4s linear infinite; z-index: -1;
 }
-
-@keyframes heartBeatPulse {
-  0%, 100% { transform: scale(1); }
-  25% { transform: scale(1.22); }
-  50% { transform: scale(0.95); }
-  75% { transform: scale(1.15); }
+@keyframes hubRotate { 100% { transform: rotate(360deg); } }
+.global-hub-trigger:hover {
+  transform: scale(1.1) translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(245, 158, 11, 0.4);
 }
-
-@keyframes heartPulseRipple {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
+.global-hub-trigger:active { transform: scale(0.95); }
+.global-hub-icon { font-size: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
 /* ================= 🎵 歌曲列表抽屉 ================= */
 .playlist-drawer {
@@ -1599,7 +1598,7 @@
   overflow: hidden !important;
 }
 
-/* ================= 🎂 核心重构：3D 全息动态生辰盲盒引擎 (硬件加速 + 粒子滤镜) ================= */
+/* ================= 🎂 3D 全息动态生辰盲盒引擎 ================= */
 .birthday-container {
   display: flex;
   flex-direction: column;
@@ -1690,7 +1689,6 @@
   box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
 }
 
-/* 3D 盲盒全屏模态引擎 */
 .bd-3d-modal {
   position: fixed;
   inset: 0;
@@ -1713,7 +1711,6 @@
   -webkit-backdrop-filter: blur(20px);
 }
 
-/* 🎯 开启终极 3D 舞台视差（陀螺仪感应区域） */
 .bd-3d-scene {
   perspective: 1200px;
   -webkit-perspective: 1200px;
@@ -1746,17 +1743,15 @@
   z-index: 100;
 }
 
-/* 核心：卡片容器允许内部元素突破 Z 轴限制 */
 .bd-card-wrapper {
   width: 100%;
   aspect-ratio: 3 / 4;
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
-  transition: transform 0.1s ease-out; /* 响应鼠标与陀螺仪的高频更新 */
+  transition: transform 0.1s ease-out;
   margin-bottom: 24px;
 }
 
-/* 核心：底层底板 */
 .bd-card {
   width: 100%;
   height: 100%;
@@ -1771,7 +1766,6 @@
   transform: translateZ(0);
 }
 
-/* 陀螺仪玻璃高光折射层 */
 .bd-card-glare {
   position: absolute;
   width: 200%;
@@ -1787,7 +1781,6 @@
   transform: translateZ(20px);
 }
 
-/* 🌟 高定模版 A: 深空机甲 (男 · Cyber Matrix) */
 .bd-tpl-A {
   background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
   border: 2px solid #0ea5e9;
@@ -1814,9 +1807,8 @@
 .bd-tpl-A .bd-card-title { color: #38bdf8; font-family: ui-monospace, monospace; font-size: 20px; text-transform: uppercase; letter-spacing: 2px; transform: translateZ(30px); }
 .bd-tpl-A .bd-card-msg { color: #e2e8f0; font-size: 14.5px; transform: translateZ(20px); }
 
-/* 🌟 高定模版 B: 黑金岁月 (男 · Obsidian Gold) */
 .bd-tpl-B {
-  background: #111; /* 纯黑底 */
+  background: #111; 
   border: 4px solid #d97706;
   box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 0 4px #000;
 }
@@ -1840,7 +1832,6 @@
 .bd-tpl-B .bd-card-title { color: #fcd34d; font-family: "Playfair Display", serif; font-size: 24px; font-weight: 900; letter-spacing: 1px; transform: translateZ(25px); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 .bd-tpl-B .bd-card-msg { color: #d1d5db; font-size: 14.5px; font-family: serif; transform: translateZ(15px); }
 
-/* 🌟 高定模版 C: 法式初雪 (女 · Crystal Snow) */
 .bd-tpl-C {
   background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(252, 231, 243, 0.75) 100%);
   backdrop-filter: blur(24px);
@@ -1849,7 +1840,6 @@
   box-shadow: 0 20px 40px rgba(244, 63, 94, 0.15), inset 0 1px 2px #fff;
 }
 
-/* 利用 3 层阴影制造漫天飞雪特效，Z轴深度错落 */
 .bd-tpl-C::before {
   content: '';
   position: absolute;
@@ -1873,7 +1863,6 @@
 .bd-tpl-C .bd-card-title { color: #9f1239; font-family: serif; font-size: 26px; font-weight: 800; transform: translateZ(30px); }
 .bd-tpl-C .bd-card-msg { color: #4b5563; font-size: 14.5px; font-weight: 600; line-height: 1.8; transform: translateZ(20px); }
 
-/* 🌟 高定模版 D: 复古相纸 (女 · Vintage Polaroid) */
 .bd-tpl-D {
   background: #fdfbf7;
   border: 12px solid #ffffff;
@@ -1897,7 +1886,7 @@
   background: radial-gradient(circle, #ef4444 30%, #991b1b 100%);
   border-radius: 50%;
   box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-  transform: translateX(-50%) translateZ(40px); /* 3D 悬浮红色图钉 */
+  transform: translateX(-50%) translateZ(40px);
 }
 
 .bd-tpl-D .bd-card-photo-box { border-radius: 2px; border: 1px solid #e5e7eb; transform: translateZ(5px); }
@@ -1906,7 +1895,6 @@
 .bd-tpl-D .bd-card-msg { color: #374151; font-size: 14.5px; font-family: monospace; font-style: italic; transform: translateZ(10px); }
 .bd-tpl-D .bd-card-stamp { position: absolute; bottom: -30px; right: 10px; color: #e11d48; font-size: 24px; font-weight: 900; transform: rotate(-15deg) translateZ(20px); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); z-index: 10;}
 
-/* 3D 贺卡基础子结构 */
 .bd-card-photo-box { width: 100%; height: 52%; overflow: hidden; background: #000; flex-shrink: 0; position: relative; }
 .bd-card-particles { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 .bd-card-img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1;}
@@ -1915,14 +1903,13 @@
 .bd-card-title { margin-bottom: 12px; }
 .bd-card-msg { line-height: 1.6; word-break: break-word; }
 
-/* 🌟 听觉引擎：全息语音流操作舱 */
 .bd-audio-capsule {
-  margin-top: auto; /* 推到底部 */
+  margin-top: auto;
   padding-top: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateZ(35px); /* 突出悬浮感 */
+  transform: translateZ(35px);
 }
 
 .bd-play-btn {
@@ -1958,7 +1945,6 @@
 }
 @keyframes audioPulse { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
 
-/* 清分享按钮 */
 .bd-export-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -2008,10 +1994,12 @@
   .stage-modal__title { font-size: 14.5px; }
   .stage-modal__body { padding: 16px 12px; }
 
-  .vinyl-player { bottom: max(16px, env(safe-area-inset-bottom, 16px)); left: 12px; }
-  .heart-music-capsule { width: 44px; height: 44px; }
-  .heart-music-core { width: 28px; height: 28px; }
-  .heart-music-icon { font-size: 13px; }
+  /* 顶部音乐胶囊与全局呼出按钮移动端适配 */
+  .top-music-capsule { left: 10px; top: max(10px, env(safe-area-inset-top, 10px)); padding: 3px 4px; }
+  .music-info { max-width: 60px; }
+  .music-title { font-size: 11px; }
+  .global-hub-trigger { bottom: max(16px, env(safe-area-inset-bottom, 16px)); right: 16px; width: 48px; height: 48px; }
+  .global-hub-icon { font-size: 22px; }
 
   .playlist-drawer { left: 12px; bottom: calc(max(16px, env(safe-area-inset-bottom, 16px)) + 54px); width: calc(100vw - 24px); max-width: 320px; max-height: 320px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
   
