@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe) 前台核心主控
  * 文件名: js/core.js
- * 作用: 门禁鉴权、异步竞态锁防闪烁、高定版控制台密码入口、全局状态分发重组
+ * 作用: 门禁鉴权、异步竞态锁防闪烁、高定版全局密码弹窗、全局动态权限（RBAC）分发重组
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sessionStorage.getItem("universe_unlocked") === "true") {
     setTimeout(() => unlockMainUniverse(false), 50);
   }
+
+  // 1. 初始化权限验证与视图装载
+  window.IS_ADMIN = false;
+  checkAdminStatus(); // 异步验证，成功后自动刷新局部视图
 
   const cloudSyncPromise = syncCloudData();
 
@@ -119,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   initGatekeeperUI();
-  initAdminPortalTrigger(); 
+  initGlobalAuthModal();
 
   const roseOverlay = document.getElementById('rose-click-overlay');
   if (roseOverlay) {
@@ -141,6 +145,152 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ============================================================================
+  // 🛡️ 全局动态权限验证引擎 (RBAC)
+  // ============================================================================
+  async function checkAdminStatus() {
+    const token = localStorage.getItem("love_owner_token") || localStorage.getItem("love_admin_token") || "";
+    if (!token) {
+        updateFrontendRBAC(false);
+        return;
+    }
+    try {
+        const res = await fetch("/api/check-auth", {
+            headers: { "x-admin-auth": token, "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        updateFrontendRBAC(!!data.isAdmin);
+    } catch (e) {
+        updateFrontendRBAC(false);
+    }
+  }
+
+  function updateFrontendRBAC(isAdmin) {
+    window.IS_ADMIN = isAdmin;
+    const divider = document.querySelector('.hub-modal-divider');
+    const mgmtArea = document.querySelector('.hub-management-area');
+    
+    if (isAdmin) {
+      document.documentElement.classList.add('is-owner');
+      document.body.classList.add('is-owner');
+      if (divider) divider.style.display = 'flex';
+      if (mgmtArea) mgmtArea.style.display = 'grid';
+    } else {
+      document.documentElement.classList.remove('is-owner');
+      document.body.classList.remove('is-owner');
+      if (divider) divider.style.display = 'none';
+      if (mgmtArea) mgmtArea.style.display = 'none';
+    }
+  }
+
+  // ============================================================================
+  // 🔐 高颜值统一下拉/双击密码呼出逻辑
+  // ============================================================================
+  function initGlobalAuthModal() {
+    const trigger = document.getElementById("secretKeyholeTrigger");
+    const modal = document.getElementById("hq-admin-auth-modal");
+    const input = document.getElementById("hq-admin-input");
+    const confirmBtn = document.getElementById("hq-admin-confirm");
+    const cancelBtn = document.getElementById("hq-admin-cancel");
+    const errorText = document.getElementById("hq-admin-error");
+
+    // 全局绑定给星轨功能中枢内的底层按钮调用
+    window.openAdminAuthModal = function() {
+      if (typeof window.closeGlobalHub === "function") window.closeGlobalHub();
+      if (window.IS_ADMIN) location.href = "admin.html";
+      else showModal();
+    };
+
+    window.openSecretOwnerModal = function() {
+      if (typeof window.closeGlobalHub === "function") window.closeGlobalHub();
+      if (window.IS_ADMIN) showAuthError("✨ 当前设备已是持印者状态，无需重复鉴证。");
+      else showModal();
+    };
+
+    if (trigger) {
+      let lastTap = 0;
+      trigger.addEventListener("touchend", (e) => {
+        const now = Date.now();
+        if (now - lastTap < 300 && now - lastTap > 0) {
+          e.preventDefault(); showModal(); lastTap = 0;
+        } else { lastTap = now; }
+      }, { passive: false });
+      trigger.addEventListener("dblclick", (e) => {
+        e.preventDefault(); showModal();
+      });
+      trigger.addEventListener("contextmenu", e => e.preventDefault());
+    }
+
+    function showModal() {
+      if (window.IS_ADMIN) {
+        showAuthError("✨ 当前设备已是持印者状态，无需重复鉴证。");
+        return;
+      }
+      if (!modal) return;
+      if (input) input.value = "";
+      if (errorText) errorText.style.display = "none";
+      modal.style.display = "flex";
+      setTimeout(() => modal.classList.add("active"), 10);
+      if (input) input.focus();
+    }
+
+    function hideModal() {
+      if (!modal) return;
+      modal.classList.remove("active");
+      setTimeout(() => { modal.style.display = "none"; }, 300);
+    }
+
+    if (cancelBtn) cancelBtn.onclick = hideModal;
+    if (confirmBtn) confirmBtn.onclick = () => doLogin(input ? input.value : "");
+    if (input) input.onkeydown = (e) => { if (e.key === "Enter") doLogin(input.value); };
+
+    async function doLogin(pwd) {
+      const val = (pwd || "").trim();
+      if (!val) {
+        if (errorText) { errorText.textContent = "请输入密钥"; errorText.style.display = "block"; }
+        return;
+      }
+      const origText = confirmBtn.textContent;
+      confirmBtn.textContent = "鉴证中...";
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: val })
+        });
+        const data = await res.json();
+        if (data.success && data.token) {
+          localStorage.setItem("love_owner_token", data.token);
+          localStorage.setItem("love_admin_token", data.token);
+          updateFrontendRBAC(true);
+          hideModal();
+          showAuthError("✨ 设备鉴证成功，已永久开放核心写权限！");
+        } else {
+          if (errorText) { errorText.textContent = "❌ 密钥错误或无权限"; errorText.style.display = "block"; }
+        }
+      } catch(e) {
+        if (errorText) { errorText.textContent = "网络异常"; errorText.style.display = "block"; }
+      } finally {
+        confirmBtn.textContent = origText;
+      }
+    }
+  }
+
+  function showAuthError(msg) {
+    if (window.Effects && typeof window.Effects.showMiniToast === "function") {
+      window.Effects.showMiniToast(msg);
+    } else {
+      const toast = document.getElementById("guestAlertToast");
+      if (toast) {
+        toast.textContent = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2500);
+      } else {
+        alert(msg);
+      }
+    }
+  }
+
   function initGatekeeperUI() {
     const gateCfg = config.gatekeeper || {};
     if (dom.gatekeeperTitle) dom.gatekeeperTitle.textContent = gateCfg.title || "🔒 验证恒久契约";
@@ -154,119 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (dom.voiceUnlockBtn) {
       dom.voiceUnlockBtn.onclick = (e) => { e.preventDefault(); startVoiceRecognition(); };
-    }
-  }
-
-  function initAdminPortalTrigger() {
-    if (!dom.heroNames) return;
-    
-    const triggerAdminAction = async (e) => {
-      if (e.cancelable) e.preventDefault();
-      e.stopPropagation();
-      
-      const pwd = await showAdminAuthModal();
-      if (!pwd) return;
-
-      let isVerified = false;
-
-      // 🌟 核心修复：直接对接后端专用的鉴权路由 /api/auth/login 或 verify-gatekeeper
-      try {
-        const res = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: pwd })
-        });
-        const data = await res.json();
-        if (data.success) {
-          isVerified = true;
-        }
-      } catch (_) {}
-
-      // 兜底校验：尝试走通用门禁鉴权路由
-      if (!isVerified) {
-        try {
-          const res = await fetch("/api/love/verify-gatekeeper", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: pwd })
-          });
-          const data = await res.json();
-          if (data.success) {
-            isVerified = true;
-            if (data.memberToken) {
-              localStorage.setItem("love_owner_token", data.memberToken);
-            }
-          }
-        } catch (_) {}
-      }
-
-      if (isVerified) {
-        localStorage.setItem("love_admin_token", pwd);
-        sessionStorage.setItem("universe_admin_auth", "true");
-        location.href = "admin.html";
-      } else {
-        showAuthError("❌ 管理密码错误或未授权，请重试。");
-      }
-    };
-
-    dom.heroNames.addEventListener('click', triggerAdminAction);
-    dom.heroNames.addEventListener('touchend', triggerAdminAction, { passive: false });
-  }
-
-  function showAdminAuthModal() {
-    return new Promise((resolve) => {
-      if (!dom.adminAuthModal) return resolve(null);
-      
-      const inputEl = document.getElementById("hq-admin-input");
-      const confirmBtn = document.getElementById("hq-admin-confirm");
-      const cancelBtn = document.getElementById("hq-admin-cancel");
-      const errorMsg = document.getElementById("hq-admin-error");
-      
-      if (inputEl) inputEl.value = "";
-      if (errorMsg) errorMsg.style.display = "none";
-      dom.adminAuthModal.style.display = "flex";
-      
-      setTimeout(() => dom.adminAuthModal.classList.add("active"), 10);
-      if (inputEl) inputEl.focus();
-
-      const cleanup = () => {
-        dom.adminAuthModal.classList.remove("active");
-        setTimeout(() => dom.adminAuthModal.style.display = "none", 300);
-        if (inputEl) inputEl.blur(); 
-        confirmBtn.onclick = null;
-        cancelBtn.onclick = null;
-        inputEl.onkeydown = null;
-      };
-
-      confirmBtn.onclick = () => {
-        const val = inputEl ? inputEl.value.trim() : "";
-        if (!val) {
-          if (errorMsg) { errorMsg.textContent = "请输入密钥"; errorMsg.style.display = "block"; }
-          return;
-        }
-        cleanup();
-        resolve(val);
-      };
-
-      cancelBtn.onclick = () => {
-        cleanup();
-        resolve(null);
-      };
-
-      inputEl.onkeydown = (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          confirmBtn.click();
-        }
-      };
-    });
-  }
-
-  function showAuthError(msg) {
-    if (window.Effects && typeof window.Effects.showMiniToast === "function") {
-      window.Effects.showMiniToast(msg);
-    } else {
-      alert(msg);
     }
   }
 
@@ -453,6 +490,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (result.memberToken) {
           try { sessionStorage.setItem("member_token", result.memberToken); } catch (_) {}
+        }
+        // 如果后端验证为超级管理员权限，直接前端升权
+        if (result.isAdmin) {
+          localStorage.setItem("love_owner_token", inputVal);
+          localStorage.setItem("love_admin_token", inputVal);
+          updateFrontendRBAC(true);
         }
         unlockMainUniverse(true);
       } else {
